@@ -23,7 +23,7 @@ mi_libreria_pi_ga/
 ├── utils.py             # (opcional) Funciones auxiliares
 └── README.md            # Este archivo
 
-
+```
 ---
 
 ## 🧠 Métodos incluidos
