@@ -148,6 +148,7 @@ streamlit
 ## 💡 Autor
 
 Proyecto creado por **Bruno Ruiz Juarez**
+
 Facultad de Estudios Superiores Acatlán — UNAM
 Matemáticas Aplicadas y Computación / Ciencias de Datos
 
