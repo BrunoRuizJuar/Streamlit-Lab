@@ -1397,6 +1397,216 @@ entonces si \(\lambda < \mu\), el sistema no colapsa y existe una distribución 
 """)
 
 # =========================================================
+# Seccion de Pruebas
+# =========================================================
+
+def seccion_pruebas():
+    st.header("Análisis y Pruebas – Cola M/M/1 y Teoremas Ergódicos")
+
+    st.markdown(r"""
+## Cola M/M/1: Teoremas Ergódicos
+
+Sea una cola M/M/1 con tasas de llegada \(\lambda>0\) y servicio \(\mu>0\).  
+El proceso \(X(t)\), número de clientes en el sistema, es una cadena de Markov en tiempo continuo con espacio de estados:
+
+\[
+\mathbb{N}_0 = \{0,1,2,\dots\}
+\]
+
+y matriz generadora:
+
+\[
+q_{n,n+1}=\lambda,\quad n\ge 0,
+\qquad
+q_{n,n-1}=\mu,\quad n\ge 1,
+\qquad
+q_{n,n}=-(\lambda+\mu \mathbf{1}_{\{n\ge 1\}}).
+\]
+
+Definimos el parámetro fundamental:
+
+\[
+\rho = \frac{\lambda}{\mu} \in (0,1).
+\]
+
+---
+
+## 1. Estacionariedad y ergodicidad
+
+### (a) Irreducibilidad en \(\mathbb{N}_0\)
+
+Una CTMC es irreducible si para cualesquiera \(i,j\in\mathbb N_0\) existe \(t>0\) tal que:
+
+\[
+\mathbb P_i(X(t)=j) > 0.
+\]
+
+En la M/M/1:
+
+- Desde cualquier estado \(n\) se puede llegar a \(n+1\) mediante una llegada.
+- Desde cualquier estado \(n\ge1\) se puede llegar a \(n-1\) mediante un servicio.
+- Combinando llegadas y salidas, cualquier estado es alcanzable desde cualquier otro.
+
+✔ **Conclusión:** el proceso es irreducible.
+
+---
+
+### (b) Distribución estacionaria usando balance detallado
+
+Para un proceso de nacimiento–muerte, las ecuaciones de balance detallado son:
+
+\[
+\pi_n \lambda_n = \pi_{n+1} \mu_{n+1},\qquad n\ge 0.
+\]
+
+Aquí:
+
+- \(\lambda_n = \lambda\)
+- \(\mu_0 = 0\), \(\mu_n = \mu\) para \(n\ge1\)
+
+Para \(n=0\):
+
+\[
+\pi_1 = \frac{\lambda}{\mu}\pi_0 = \rho \pi_0.
+\]
+
+Por inducción:
+
+\[
+\pi_n = \rho^n \pi_0, \qquad n\ge 0.
+\]
+
+---
+
+### (c) Normalización y ergodicidad
+
+La suma total debe ser 1:
+
+\[
+\sum_{n=0}^\infty \pi_n 
+= \pi_0 \sum_{n=0}^\infty \rho^n
+= \frac{\pi_0}{1-\rho}
+\]
+
+Entonces:
+
+\[
+\pi_0 = 1-\rho.
+\]
+
+Distribución estacionaria final:
+
+\[
+\boxed{
+\pi_n = (1-\rho)\rho^n,\qquad n\ge0.
+}
+\]
+
+La serie converge **solo si \(\rho<1\)**.
+
+✔ Si \(\rho<1\): recurrente positiva → ergódica  
+❌ Si \(\rho\ge1\): no existe estación → no ergódica
+
+---
+
+## 2. Proporción de tiempo con \(X(t)\ge 3\)
+
+Sea:
+
+\[
+f(x)=\mathbf 1_{\{x\ge 3\}}.
+\]
+
+### (a) Teorema ergódico para CTMC
+
+Si una CTMC es irreducible + recurrente positiva y \(f\) es integrable:
+
+\[
+\lim_{T\to\infty} \frac1T \int_0^T f(X(t))\,dt 
+= \sum_{n=0}^\infty f(n)\pi_n 
+= \mathbb E_\pi[f(X)].
+\]
+
+### (b) Aplicación:
+
+\[
+\sum_{n=3}^\infty \pi_n 
+= (1-\rho) \sum_{n=3}^\infty \rho^n.
+\]
+
+### (c) Cálculo explícito:
+
+\[
+(1-\rho)\rho^3 \frac{1}{1-\rho}
+= \boxed{\rho^3}.
+\]
+
+Interpretación:
+> Proporción de tiempo de largo plazo con **3 o más clientes en el sistema**.
+
+---
+
+## 3. Costo promedio de largo plazo
+
+Sea el costo instantáneo:
+
+\[
+g(n) = n^2.
+\]
+
+### (a) Integrabilidad
+
+Como \(n^2 \rho^n \to 0\) cuando \(n\to\infty\):
+
+\[
+\sum_{n=0}^\infty n^2 (1-\rho)\rho^n < \infty.
+\]
+
+✔ Entonces, \(g\) es integrable respecto a \(\pi\).
+
+---
+
+### (b) Teorema ergódico aplicado a \(g\)
+
+\[
+\lim_{T\to\infty} \frac{1}{T} \int_0^T g(X(t))\,dt
+= \sum_{n=0}^\infty n^2 \pi_n
+= \mathbb E_\pi[n^2].
+\]
+
+---
+
+### (c) Cálculo explícito de \(\mathbb{E}_\pi[n^2]\)
+
+Si \(N\sim\mathrm{Geom}(1-\rho)\) en \(\{0,1,2,\dots\}\):
+
+\[
+\mathbb E[N] = \frac{\rho}{1-\rho}, \qquad 
+\mathrm{Var}(N) = \frac{\rho}{(1-\rho)^2}.
+\]
+
+Entonces:
+
+\[
+\mathbb E[N^2] 
+= \mathrm{Var}(N) + (\mathbb E[N])^2
+= \frac{\rho(1+\rho)}{(1-\rho)^2}.
+\]
+
+Por tanto:
+
+\[
+\boxed{
+\mathbb E_\pi[g(X)] = \frac{\rho(1+\rho)}{(1-\rho)^2}.
+}
+\]
+
+Interpretación:
+> **Costo promedio de largo plazo** cuando el costo crece cuadráticamente con el número de clientes.
+""")
+
+
+# =========================================================
 # Aplicación principal
 # =========================================================
 def main():
@@ -1425,7 +1635,7 @@ def main():
         "Ejercicio 18: EM para mezcla normal": ejercicio_18,
         "Ejercicio 19: Proceso de Markov — Teorema ergódico": ejercicio_19,
         "Ejercicio 20: Proceso de nacimiento y muerte": ejercicio_20,
-        "Análisis y Pruebas": seccion_pruebas,
+        "Análisis y Pruebas": seccion_pruebas
     }
 
     choice = st.sidebar.radio("Selecciona el ejercicio", list(opciones.keys()))
