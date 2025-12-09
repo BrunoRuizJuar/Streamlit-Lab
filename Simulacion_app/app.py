@@ -1309,7 +1309,7 @@ y análogo para el componente 2.
 # Aplicación principal
 # =========================================================
 def main():
-    st.title("Tarea de Simulación – Ejercicios 1–18")
+    st.title("Tarea de Simulación")
 
     st.sidebar.title("Navegación")
 
