@@ -636,92 +636,99 @@ Simulamos \(X\sim\text{Beta}(2,6)\) mediante:
         st.write(f"Media teórica: {2/(2+6):.4f}")
 
 # =========================================================
-# Ejercicio 10: Mezcla 50%-50% de Gumbel y Gamma
+# Ejercicio 10: Mezcla 50%-50% Gumbel y Gamma
 # =========================================================
 
 def ejercicio_10():
     st.header("Ejercicio 10: Mezcla de Gumbel y Gamma")
 
     st.markdown(r"""
-Sea la mezcla:
+Sea una mezcla:
 
 \[
-X =
-\begin{cases}
-X_G,& \text{con prob. } 0.5,\\
-X_\Gamma,& \text{con prob. } 0.5,
+X = \begin{cases}
+X_G & \text{con prob. } 0.5,\\[4pt]
+X_\Gamma & \text{con prob. } 0.5,
 \end{cases}
 \]
 
-donde \(X_G\sim\text{Gumbel}(\mu,\beta)\) y \(X_\Gamma\sim\Gamma(\alpha,\lambda)\).
+donde:
 
-Sabemos:
+- \(X_G \sim \text{Gumbel}(\mu,\beta)\)
+- \(X_\Gamma \sim \text{Gamma}(\alpha,\lambda)\)
+
+### **Valores teóricos**
 
 \[
-E[X_G]=\mu + \beta\gamma,\qquad
+E[X] = 0.5\,E[X_G] + 0.5\,E[X_\Gamma],
+\]
+
+\[
+\mathrm{Var}(X) = 0.5\,\mathrm{Var}(X_G) + 0.5\,\mathrm{Var}(X_\Gamma)
++ 0.5(1)\,(E[X_G] - E[X_\Gamma])^2 .
+\]
+
+Usando:
+
+\[
+E[X_G] = \mu + \beta\gamma,\qquad
 \mathrm{Var}(X_G)=\frac{\pi^2}{6}\beta^2,
 \]
 
 \[
-E[X_\Gamma]=\frac{\alpha}{\lambda},\qquad
-\mathrm{Var}(X_\Gamma)=\frac{\alpha}{\lambda^2},
-\]
-
-\[
-E[X]=\tfrac12 E[X_G]+\tfrac12 E[X_\Gamma],
-\]
-
-\[
-\mathrm{Var}(X)
-= \tfrac12\mathrm{Var}(X_G)+\tfrac12\mathrm{Var}(X_\Gamma)
-+ \tfrac12 (E[X_G]-E[X_\Gamma])^2.
+E[X_\Gamma] = \frac{\alpha}{\lambda},\qquad
+\mathrm{Var}(X_\Gamma]=\frac{\alpha}{\lambda^2}.
 \]
 """)
 
-    mu = st.number_input("μ (Gumbel)", value=0.0, step=0.1)
-    beta = st.number_input("β (Gumbel)", value=1.0, step=0.1)
-    alpha = st.number_input("α (Gamma)", value=2.0, step=0.1)
-    lam = st.number_input("λ (Gamma)", value=1.0, step=0.1)
-    n = st.number_input("Tamaño de muestra", min_value=2000, max_value=50000,
-                        value=10000, step=1000, key="n10")
-    seed = st.number_input("Semilla", min_value=0, value=987, key="seed10")
+    mu = st.number_input("μ (Gumbel)", value=0.0)
+    beta = st.number_input("β (Gumbel)", value=1.0)
+    alpha = st.number_input("α (Gamma)", value=2.0)
+    lam = st.number_input("λ (Gamma)", value=1.0)
+    n = st.number_input("Tamaño de muestra", min_value=2000, max_value=50000, value=10000)
+    seed = st.number_input("Semilla", value=987)
 
     if st.button("Simular mezcla"):
         np.random.seed(seed)
 
-        choice = np.random.rand(n) < 0.5
+        choice = np.random.rand(int(n)) < 0.5
 
-        U = np.random.rand(n)
-        Xg = mu - beta*np.log(-np.log(U))
+        # Gumbel
+        U = np.random.rand(int(n))
+        Xg = mu - beta * np.log(-np.log(U))
 
+        # Gamma
         if float(alpha).is_integer():
             k = int(alpha)
-            Ug = np.random.rand(n, k)
+            Ug = np.random.rand(int(n), k)
             Xga = -np.log(Ug).sum(axis=1) / lam
         else:
             from scipy.stats import gamma
-            Xga = gamma.rvs(alpha, scale=1/lam, size=n)
+            Xga = gamma.rvs(alpha, scale=1/lam, size=int(n))
 
         X = np.where(choice, Xg, Xga)
 
         emp_mean = X.mean()
         emp_var = X.var(ddof=1)
 
-        gamma_c = 0.5772156649
-        EG = mu + beta*gamma_c
-        VG = (np.pi**2 / 6)*beta**2
+        gamma_const = 0.5772156649
+        EG = mu + beta * gamma_const
+        VG = (np.pi**2 / 6) * beta**2
         EGa = alpha / lam
         VGa = alpha / lam**2
 
-        th_mean = 0.5*(EG + EGa)
-        th_var = 0.5*VG + 0.5*VGa + 0.5*(EG - EGa)**2
+        true_mean = 0.5*(EG + EGa)
+        true_var = 0.5*VG + 0.5*VGa + 0.5*(EG - EGa)**2
 
-        st.write(f"Media empírica: {emp_mean:.4f} — Teórica: {th_mean:.4f}")
-        st.write(f"Var empírica:   {emp_var:.4f} — Teórica: {th_var:.4f}")
+        st.subheader("Resultados")
+        st.write(f"Media empírica = {emp_mean:.4f}")
+        st.write(f"Media teórica = {true_mean:.4f}")
+        st.write(f"Varianza empírica = {emp_var:.4f}")
+        st.write(f"Varianza teórica = {true_var:.4f}")
 
         fig, ax = plt.subplots()
         ax.hist(X, bins=60, density=True, alpha=0.6)
-        ax.set_title("Mezcla 0.5·Gumbel + 0.5·Gamma")
+        ax.set_title("Mezcla Gumbel–Gamma")
         st.pyplot(fig)
 
 # =========================================================
@@ -729,31 +736,38 @@ E[X]=\tfrac12 E[X_G]+\tfrac12 E[X_\Gamma],
 # =========================================================
 
 def ejercicio_11():
-    st.header("Ejercicio 11: Metropolis–Hastings con propuesta Normal truncada en (0,1)")
+    st.header("Ejercicio 11: Metropolis–Hastings con propuesta Normal truncada")
 
     st.markdown(r"""
-Queremos muestrear de
+Queremos simular de la distribución Beta:
 
 \[
-\pi(x) \propto x^{a-1}(1-x)^{b-1}, \quad x\in(0,1),
+\pi(x) \propto x^{a-1}(1-x)^{b-1}, \qquad x\in(0,1).
 \]
 
-es decir, una \(\mathrm{Beta}(a,b)\), usando un algoritmo de Metropolis–Hastings con
-propuesta Normal truncada:
+Usaremos Metropolis–Hastings con propuesta:
 
 \[
-Y\sim N(x_t,\sigma^2)\ \text{recortada a }(0,1).
+Y \sim N(x_t,\sigma^2)\text{ truncada a }(0,1).
+\]
+
+El paso de aceptación es:
+
+\[
+\alpha(x_t,y)=\min\left\{1,
+\frac{\pi(y)\,q(x_t|y)}{\pi(x_t)\,q(y|x_t)}
+\right\}.
 \]
 """)
 
-    a = st.number_input("a (>0)", value=2.0, step=0.1)
-    b = st.number_input("b (>0)", value=5.0, step=0.1)
-    sigma = st.number_input("σ (propuesta)", value=0.15, step=0.05)
+    a = st.number_input("a (>0)", value=2.0)
+    b = st.number_input("b (>0)", value=5.0)
+    sigma = st.number_input("σ propuesta", value=0.15)
     n = st.number_input("Iteraciones MH", min_value=2000, max_value=50000,
-                        value=15000, step=1000, key="n11")
-    seed = st.number_input("Semilla", min_value=0, value=2024, key="seed11")
+                        value=15000)
+    seed = st.number_input("Semilla", value=2024)
 
-    if st.button("Ejecutar Metropolis–Hastings"):
+    if st.button("Ejecutar Metropolis-Hastings"):
         np.random.seed(seed)
 
         def log_pi(x):
@@ -761,11 +775,7 @@ Y\sim N(x_t,\sigma^2)\ \text{recortada a }(0,1).
 
         def q_sample(x):
             y = np.random.normal(x, sigma)
-            if y < 0:
-                y = 0
-            if y > 1:
-                y = 1
-            return y
+            return min(max(y, 0), 1)
 
         def log_q(x_from, x_to):
             return -0.5*((x_from - x_to)**2) / sigma**2
@@ -778,27 +788,25 @@ Y\sim N(x_t,\sigma^2)\ \text{recortada a }(0,1).
             xt = X[t-1]
             y = q_sample(xt)
 
-            la = (log_pi(y) - log_pi(xt)
-                  + log_q(xt, y) - log_q(y, xt))
+            log_alpha = (log_pi(y) - log_pi(xt)) \
+                        + (log_q(xt, y) - log_q(y, xt))
 
-            if np.log(np.random.rand()) < la:
+            if np.log(np.random.rand()) < log_alpha:
                 X[t] = y
                 accepts += 1
             else:
                 X[t] = xt
 
-        acc_rate = accepts / n
-        st.write(f"Tasa de aceptación ≈ {acc_rate:.3f}")
+        st.write(f"Tasa de aceptación ≈ {accepts/n:.3f}")
+
+        fig, ax = plt.subplots(2,1)
+        ax[0].plot(X[:500])
+        ax[0].set_title("Primeros 500 valores")
 
         from scipy.stats import beta
-
-        fig, ax = plt.subplots(2, 1, figsize=(6, 8))
-        ax[0].plot(X[:500])
-        ax[0].set_title("Primeros 500 valores de la cadena")
-
-        ax[1].hist(X[int(n/2):], bins=50, density=True, alpha=0.6)
+        ax[1].hist(X[int(n/2):], bins=50, density=True)
         grid = np.linspace(0.001, 0.999, 300)
-        ax[1].plot(grid, beta.pdf(grid, a, b), linewidth=2, label="Beta(a,b)")
+        ax[1].plot(grid, beta.pdf(grid, a, b), label="Beta(a,b)")
         ax[1].legend()
 
         st.pyplot(fig)
@@ -808,251 +816,206 @@ Y\sim N(x_t,\sigma^2)\ \text{recortada a }(0,1).
 # =========================================================
 
 def ejercicio_12():
-    st.header("Ejercicio 12: Distribución Laplace vía dos métodos")
+    st.header("Ejercicio 12: Distribución Laplace — Transformada y Mezcla")
 
     st.markdown(r"""
-La distribución Laplace(0,b) tiene densidad:
+La densidad Laplace(0,b) es:
 
 \[
-f(x)=\frac{1}{2b}\exp\!\left(-\frac{|x|}{b}\right).
+f(x)=\frac{1}{2b}e^{-|x|/b}.
 \]
 
-Dos métodos:
+### **Transformada inversa**
 
-1. **Transformada inversa**  
-   Si \(U\sim U(0,1)\),
+\[
+X = \begin{cases}
+b\ln(2U), & U<1/2,\\[4pt]
+-b\ln(2(1-U)), & U\ge 1/2.
+\end{cases}
+\]
 
-   \[
-   X =
-   \begin{cases}
-   b\ln(2U), & U<1/2,\\[4pt]
-   -b\ln(2(1-U)), & U\ge 1/2.
-   \end{cases}
-   \]
+### **Mezcla exponencial**
 
-2. **Mezcla exponencial**  
-   \(B\sim\text{Bernoulli}(0.5)\), \(E\sim\text{Exp}(1/b)\),
+\[
+X = 
+\begin{cases}
+E, & B=1,\\
+-E,& B=0,
+\end{cases}
+\]
 
-   \[
-   X =
-   \begin{cases}
-   E, & B=1,\\
-   -E, & B=0.
-   \end{cases}
-   \]
+con \(B\sim\text{Bernoulli}(0.5)\) y \(E\sim\text{Exp}(1/b)\).
 """)
 
-    b = st.number_input("Parámetro b", value=1.0, step=0.1)
-    n = st.number_input("Tamaño de muestra", min_value=2000, max_value=50000,
-                        value=20000, step=2000, key="n12")
-    seed = st.number_input("Semilla", min_value=0, value=321, key="seed12")
+    b = st.number_input("Parámetro b", value=1.0)
+    n = st.number_input("Tamaño de muestra", value=20000)
+    seed = st.number_input("Semilla", value=321)
 
     if st.button("Simular Laplace"):
         np.random.seed(seed)
 
         U = np.random.rand(int(n))
-        X1 = np.where(U < 0.5,
-                      b*np.log(2*U),
-                      -b*np.log(2*(1 - U)))
+        X1 = np.where(U < 0.5, b*np.log(2*U), -b*np.log(2*(1-U)))
 
         B = np.random.rand(int(n)) < 0.5
         E = np.random.exponential(scale=b, size=int(n))
         X2 = np.where(B, E, -E)
 
-        fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+        fig, ax = plt.subplots(1,2, figsize=(12,5))
+        ax[0].hist(X1, bins=60, density=True)
+        ax[0].set_title("Transformada")
 
-        ax[0].hist(X1, bins=60, density=True, alpha=0.6, label="Transformada")
-        ax[1].hist(X2, bins=60, density=True, alpha=0.6, label="Mezcla")
+        ax[1].hist(X2, bins=60, density=True)
+        ax[1].set_title("Mezcla Exp–Bernoulli")
 
         grid = np.linspace(-7*b, 7*b, 300)
         pdf = (1/(2*b))*np.exp(-np.abs(grid)/b)
-
-        ax[0].plot(grid, pdf, linewidth=2)
-        ax[1].plot(grid, pdf, linewidth=2)
-
-        ax[0].legend()
-        ax[1].legend()
-        ax[0].set_title("Transformada inversa")
-        ax[1].set_title("Mezcla Exp–Bernoulli")
+        ax[0].plot(grid, pdf)
+        ax[1].plot(grid, pdf)
 
         st.pyplot(fig)
 
-        st.subheader("Medias y varianzas")
-        st.write(f"Método 1: media {X1.mean():.4f}, var {X1.var(ddof=1):.4f}")
-        st.write(f"Método 2: media {X2.mean():.4f}, var {X2.var(ddof=1):.4f}")
-        st.write(f"Teóricas: media 0, var = 2 b² = {2*b*b:.4f}")
 # =========================================================
 # Ejercicio 13: Distribución Cauchy(0,1) vía transformada
 # =========================================================
 
 def ejercicio_13():
-    st.header("Ejercicio 13: Distribución Cauchy(0,1)")
+    st.header("Ejercicio 13: Distribución Cauchy por Transformada")
 
     st.markdown(r"""
-La Cauchy(0,1) tiene F.C.D.A.:
+La Cauchy(0,1) tiene CDF:
 
 \[
-F(x)=\frac{1}{\pi}\arctan(x) + \frac12.
+F(x)=\frac1\pi\arctan(x)+\frac12.
 \]
 
-Aplicando transformada inversa, si \(U\sim U(0,1)\):
+**Transformada inversa:**
 
 \[
-U = \frac{1}{\pi}\arctan(X) + \tfrac12
-\quad\Longrightarrow\quad
 X = \tan\big(\pi(U-\tfrac12)\big).
 \]
 """)
 
-    n = st.number_input("Tamaño de muestra", min_value=1000, max_value=50000,
-                        value=20000, step=1000, key="n13")
-    seed = st.number_input("Semilla", min_value=0, value=31415, key="seed13")
+    n = st.number_input("Tamaño de muestra", value=20000)
+    seed = st.number_input("Semilla", value=31415)
 
-    if st.button("Simular Cauchy(0,1)"):
+    if st.button("Simular Cauchy"):
         np.random.seed(seed)
-
         U = np.random.rand(int(n))
-        X = np.tan(np.pi * (U - 0.5))
+        X = np.tan(np.pi*(U - 0.5))
 
         fig, ax = plt.subplots()
-
         Xplot = X[np.abs(X) < np.percentile(X, 97)]
-        ax.hist(Xplot, bins=60, density=True, alpha=0.6, label="Simulación recortada")
+        ax.hist(Xplot, bins=60, density=True)
 
-        grid = np.linspace(-10, 10, 400)
-        pdf = 1 / (np.pi * (1 + grid**2))
-        ax.plot(grid, pdf, linewidth=2, label="Cauchy(0,1)")
+        grid = np.linspace(-10, 10, 300)
+        pdf = 1/(np.pi*(1+grid**2))
+        ax.plot(grid, pdf)
 
-        ax.legend()
-        ax.set_title("Simulación de Cauchy(0,1) por transformada inversa")
         st.pyplot(fig)
 
-        st.write(f"Mediana empírica ≈ {np.median(X):.4f} (la Cauchy no tiene media finita).")
-
 # =========================================================
-# Ejercicio 14: Normal multivariada vía Cholesky
+# Ejercicio 14: Normal Multivariada usando Cholesky
 # =========================================================
-
 def ejercicio_14():
-    st.header("Ejercicio 14: Normal multivariada usando descomposición de Cholesky")
+    st.header("Ejercicio 14: Normal Multivariada usando Cholesky")
 
     st.markdown(r"""
-Queremos simular
+Simulamos:
 
 \[
-X \sim N(\mu, \Sigma),
+X\sim N(\mu,\Sigma).
 \]
 
-usando:
+Método:
 
-1. Descomponer \(\Sigma = LL^\top\) (Cholesky).
-2. Simular \(Z\sim N(0, I)\).
-3. Tomar \(X = \mu + LZ\).
-
-Entonces \(\mathrm{Cov}(X)=\Sigma\).
+1. Obtener \(L\) tal que \(LL^\top=\Sigma\).
+2. Generar \(Z\sim N(0,I)\).
+3. \(X=\mu+LZ\).
 """)
 
-    rho = st.slider("Correlación ρ", min_value=-0.95, max_value=0.95,
-                    value=0.6, step=0.05)
-    n = st.number_input("Tamaño de muestra", min_value=2000, max_value=50000,
-                        value=20000, step=2000, key="n14")
-    seed = st.number_input("Semilla", min_value=0, value=2025, key="seed14")
+    rho = st.slider("Correlación ρ", -0.95, 0.95, 0.6)
+    n = st.number_input("Tamaño muestra", value=20000)
+    seed = st.number_input("Semilla", value=2025)
 
-    if st.button("Simular Normal multivariada"):
+    if st.button("Simular Normal Multivariada"):
         np.random.seed(seed)
 
-        mu = np.array([0.0, 0.0])
-        Sigma = np.array([[1.0, rho],
-                          [rho, 1.0]])
+        mu = np.array([0,0])
+        Sigma = np.array([[1, rho],[rho,1]])
 
         L = np.linalg.cholesky(Sigma)
 
         Z = np.random.randn(2, int(n))
-        X = mu.reshape(2, 1) + L @ Z
-
-        X1, X2 = X[0], X[1]
+        X = mu.reshape(2,1) + L @ Z
 
         fig, ax = plt.subplots()
-        ax.scatter(X1[:4000], X2[:4000], alpha=0.3, s=8)
-        ax.set_xlabel("X1")
-        ax.set_ylabel("X2")
-        ax.set_title("Nube de puntos – Normal bivariada")
+        ax.scatter(X[0,:2000], X[1,:2000], alpha=0.3, s=8)
         st.pyplot(fig)
 
-        est_cov = np.cov(X)
-        st.subheader("Covarianza estimada vs teórica")
         st.write("Covarianza estimada:")
-        st.write(est_cov)
-        st.write("Σ teórica:")
-        st.write(Sigma)
-        st.write(f"Correlación empírica ≈ {np.corrcoef(X1, X2)[0,1]:.4f}")
+        st.write(np.cov(X))
 
 # =========================================================
 # Ejercicio 15: Aceptación–Rechazo para densidad complicada
 # =========================================================
 
 def ejercicio_15():
-    st.header("Ejercicio 15: Aceptación–Rechazo para una densidad complicada")
+    st.header("Ejercicio 15: Aceptación–Rechazo para densidad complicada")
 
     st.markdown(r"""
-Sea
+Queremos simular una variable con densidad:
 
 \[
-f(x)\propto x^2 e^{-x^2/2},\quad x>0.
+f(x) \propto x^2 e^{-x^2/2}, \qquad x>0.
 \]
 
-Usamos propuesta:
+Usaremos como propuesta:
 
 \[
-g(x)=\text{Exp}(1),\quad x>0.
+g(x)=e^{-x},\quad x>0.
 \]
 
-La razón:
+Buscamos:
 
 \[
-\frac{f(x)}{g(x)} = x^2 e^{-x^2/2 + x},
+c=\max_x \frac{f(x)}{g(x)} = x^2 e^{-x^2/2+x}.
 \]
-
-y buscamos una cota numérica \(c\) para esta expresión.
 """)
 
-    n = st.number_input("Tamaño de muestra", min_value=1000, max_value=50000,
-                        value=10000, step=1000, key="n15")
-    seed = st.number_input("Semilla", min_value=0, value=13579, key="seed15")
+    n = st.number_input("Tamaño de muestra", value=10000)
+    seed = st.number_input("Semilla", value=13579)
 
     if st.button("Simular densidad complicada"):
         np.random.seed(seed)
 
-        xs = np.linspace(0.0001, 10, 20000)
-        ratio = xs**2 * np.exp(-xs**2/2 + xs)
-        c = np.max(ratio)
-
-        st.write(f"Constante mayorante numérica: c ≈ {c:.4f}")
+        xs = np.linspace(0.001, 10, 20000)
+        c = np.max(xs**2 * np.exp(-xs**2/2 + xs))
+        st.write(f"Constante mayorante c ≈ {c:.4f}")
 
         samples = []
         proposals = 0
 
         while len(samples) < n:
             proposals += 1
-            y = np.random.exponential(scale=1.0)
+            y = np.random.exponential()
             u = np.random.rand()
+
             if u < (y**2 * np.exp(-y**2/2 + y)) / c:
                 samples.append(y)
 
         X = np.array(samples)
-        acc_rate = n / proposals
-
-        st.write(f"Tasa de aceptación ≈ {acc_rate:.4f}")
+        acc = n/proposals
+        st.write(f"Aceptación ≈ {acc:.3f}")
 
         fig, ax = plt.subplots()
         ax.hist(X, bins=60, density=True, alpha=0.6)
 
-        grid = np.linspace(0, np.max(X), 500)
+        grid = np.linspace(0, max(X), 300)
         f_grid = grid**2 * np.exp(-grid**2/2)
         f_grid /= np.trapz(f_grid, grid)
-        ax.plot(grid, f_grid, linewidth=2, label="Densidad normalizada (numérica)")
-        ax.legend()
-        ax.set_title("Aceptación–Rechazo para densidad complicada")
+        ax.plot(grid, f_grid)
+
         st.pyplot(fig)
 
 # =========================================================
@@ -1060,325 +1023,287 @@ y buscamos una cota numérica \(c\) para esta expresión.
 # =========================================================
 
 def ejercicio_16():
-    st.header("Ejercicio 16: Algoritmo genético para minimizar f(x) = x² + 3 sin(5x)")
+    st.header("Ejercicio 16: Minimización con Algoritmo Genético (GA)")
 
     st.markdown(r"""
-Buscamos minimizar
+Queremos minimizar la función:
 
 \[
-f(x) = x^2 + 3\sin(5x), \quad x\in[-4,4].
+f(x)=x^2+3\sin(5x),\qquad x\in[-4,4].
 \]
 
-Usamos un algoritmo genético real:
-- Individuos: \(x\in[-4,4]\).
-- Cruza: promedio de padres.
-- Mutación: ruido gaussiano.
-- Selección: torneo.
+Un Algoritmo Genético típico sigue estos pasos:
+
+1. **Inicialización:** generar una población aleatoria.
+2. **Evaluación:** computar \(f(x)\) para cada individuo.
+3. **Selección:** elegir padres proporcionalmente a su aptitud.
+4. **Cruza:** combinar dos padres para formar nuevos hijos.
+5. **Mutación:** perturbar ligeramente los hijos para mantener variabilidad.
+6. **Reemplazo:** nueva generación reemplaza la anterior.
+7. **Registrar el mejor individuo por generación**.
 """)
 
-    pop_size = st.number_input("Tamaño de población", min_value=10, max_value=500,
-                               value=60, step=5, key="pop16")
-    n_gen = st.number_input("Número de generaciones", min_value=10, max_value=300,
-                            value=80, step=10, key="gen16")
-    p_crossover = st.slider("Probabilidad de cruza", min_value=0.0, max_value=1.0,
-                            value=0.8, step=0.05, key="pc16")
-    p_mut = st.slider("Probabilidad de mutación", min_value=0.0, max_value=1.0,
-                      value=0.2, step=0.05, key="pm16")
-    mut_sigma = st.number_input("Desv. estándar de mutación", min_value=0.001,
-                                max_value=2.0, value=0.2, step=0.05, key="ms16")
-    seed = st.number_input("Semilla", min_value=0, value=1234, key="seed16")
+    pop_size = st.number_input("Tamaño de la población", value=40)
+    gens = st.number_input("Número de generaciones", value=60)
+    mutation_rate = st.number_input("Tasa de mutación", value=0.15)
+    seed = st.number_input("Semilla", value=42)
 
-    def f_obj(x):
-        return x**2 + 3*np.sin(5*x)
-
-    if st.button("Ejecutar GA para f(x)"):
+    if st.button("Ejecutar GA"):
         np.random.seed(seed)
 
-        pop = -4 + 8*np.random.rand(int(pop_size))
+        def f(x):
+            return x**2 + 3*np.sin(5*x)
 
-        best_per_gen = []
-        best_x_per_gen = []
+        pop = np.random.uniform(-4, 4, int(pop_size))
 
-        def tournament_selection(pop, fitness, k=3):
-            idxs = np.random.choice(len(pop), size=k, replace=False)
-            best_idx = idxs[np.argmin(fitness[idxs])]
-            return pop[best_idx]
+        best_vals = []
+        best_pos = []
 
-        for _ in range(int(n_gen)):
-            fitness = f_obj(pop)
-            best_idx = np.argmin(fitness)
-            best_per_gen.append(fitness[best_idx])
-            best_x_per_gen.append(pop[best_idx])
+        for g in range(int(gens)):
+            fitness = -f(pop)  # minimizar → maximizamos -f
+            probs = (fitness - fitness.min()) + 1e-6
+            probs /= probs.sum()
 
-            new_pop = []
-            while len(new_pop) < len(pop):
-                p1 = tournament_selection(pop, fitness)
-                p2 = tournament_selection(pop, fitness)
+            idx = np.random.choice(len(pop), size=int(pop_size), p=probs)
+            parents = pop[idx]
 
-                if np.random.rand() < p_crossover:
-                    child = 0.5*p1 + 0.5*p2
-                else:
-                    child = p1
+            children = []
+            for i in range(0, len(parents), 2):
+                p1, p2 = parents[i], parents[(i+1) % len(parents)]
+                w = np.random.rand()
+                child = w*p1 + (1-w)*p2
+                children.append(child)
 
-                if np.random.rand() < p_mut:
-                    child += np.random.normal(0, mut_sigma)
+            children = np.array(children)
+            mut_mask = np.random.rand(len(children)) < mutation_rate
+            children[mut_mask] += np.random.normal(0, 0.3, mut_mask.sum())
+            children = np.clip(children, -4, 4)
 
-                child = np.clip(child, -4, 4)
-                new_pop.append(child)
+            pop = children.copy()
 
-            pop = np.array(new_pop)
+            best_idx = np.argmin(f(pop))
+            best_vals.append(f(pop)[best_idx])
+            best_pos.append(pop[best_idx])
 
-        best_global_idx = np.argmin(f_obj(pop))
-        best_global = pop[best_global_idx]
-        best_f = f_obj(best_global)
+        st.subheader("Evolución del mejor individuo")
 
-        st.subheader("Mejor solución encontrada")
-        st.write(f"x* ≈ {best_global:.4f}")
-        st.write(f"f(x*) ≈ {best_f:.4f}")
+        fig, ax = plt.subplots(1, 2, figsize=(12,5))
 
-        xs = np.linspace(-4, 4, 400)
-        ys = f_obj(xs)
+        ax[0].plot(best_vals)
+        ax[0].set_title("Mejor valor por generación")
+        ax[0].set_xlabel("Generación")
+        ax[0].set_ylabel("f(x)")
 
-        fig1, ax1 = plt.subplots()
-        ax1.plot(xs, ys, label="f(x)")
-        ax1.scatter(best_global, best_f, color="red", label="Mejor individuo")
-        ax1.legend()
-        ax1.set_title("Función objetivo y mejor individuo")
-        st.pyplot(fig1)
+        x_grid = np.linspace(-4,4,400)
+        ax[1].plot(x_grid, f(x_grid))
+        ax[1].scatter(best_pos[-1], best_vals[-1], color='red')
+        ax[1].set_title("Mejor valor encontrado")
+        ax[1].set_xlabel("x")
 
-        fig2, ax2 = plt.subplots()
-        ax2.plot(best_per_gen)
-        ax2.set_title("Mejor valor por generación")
-        ax2.set_xlabel("Generación")
-        ax2.set_ylabel("f(x)")
-        st.pyplot(fig2)
+        st.pyplot(fig)
+
+        st.write(f"Mejor x encontrado ≈ {best_pos[-1]:.4f}")
+        st.write(f"f(x) ≈ {best_vals[-1]:.4f}")
 
 # =========================================================
 # Ejercicio 17: GA para maximizar Sharpe de un portafolio de 5 activos
 # =========================================================
 
 def ejercicio_17():
-    st.header("Ejercicio 17: Algoritmo genético para maximizar el Sharpe de un portafolio")
+    st.header("Ejercicio 17: Optimización del portafolio (Sharpe) con Algoritmo Genético")
 
     st.markdown(r"""
-Maximizamos:
+Maximizamos el índice de Sharpe:
 
 \[
-\text{Sharpe}(w)=\frac{\mu^\top w - r_f}{\sqrt{w^\top \Sigma w}},
-\quad w_i\ge0,\ \sum_i w_i=1.
+\text{Sharpe}(w)= \frac{\mu^\top w - r_f}{\sqrt{w^\top\Sigma w}},
+\qquad w\ge0,\quad \sum_i w_i=1.
 \]
 
-Usamos GA sobre vectores de pesos.
+Usamos un GA para encontrar el vector de pesos \(w\in\mathbb{R}^5\).
 """)
 
-    mu_default = "0.12, 0.10, 0.07, 0.05, 0.03"
-    mu_str = st.text_input("Vector de medias μ (comas)", value=mu_default)
+    mu1 = st.text_input("Media de los activos (5 valores)", "0.12,0.08,0.10,0.07,0.15")
+    mu = np.array([float(x) for x in mu1.split(",")])
 
-    rf = st.number_input("Tasa libre de riesgo r_f", value=0.02, step=0.005)
+    st.markdown("### Matriz de covarianzas (5×5)")
+    Sigma_input = st.text_area("Ingresa Sigma fila por fila",
+                               "0.10,0.02,0.03,0.00,0.01\n"
+                               "0.02,0.09,0.01,0.02,0.00\n"
+                               "0.03,0.01,0.20,0.01,0.03\n"
+                               "0.00,0.02,0.01,0.07,0.02\n"
+                               "0.01,0.00,0.03,0.02,0.25")
 
-    Sigma_default = (
-        "0.04, 0.01, 0.00, 0.00, 0.00;\n"
-        "0.01, 0.03, 0.01, 0.00, 0.00;\n"
-        "0.00, 0.01, 0.025,0.005,0.00;\n"
-        "0.00, 0.00, 0.005,0.02, 0.003;\n"
-        "0.00, 0.00, 0.00, 0.003,0.015"
-    )
-    Sigma_str = st.text_area("Matriz Σ (filas separadas por ';', entradas por comas)",
-                             value=Sigma_default, height=150)
+    Sigma = np.array([[float(x) for x in row.split(",")]
+                      for row in Sigma_input.split("\n")])
 
-    pop_size = st.number_input("Tamaño de población", min_value=10, max_value=500,
-                               value=60, step=5, key="pop17")
-    n_gen = st.number_input("Generaciones", min_value=10, max_value=300,
-                            value=80, step=10, key="gen17")
-    p_crossover = st.slider("Prob. cruza", 0.0, 1.0, 0.8, 0.05, key="pc17")
-    p_mut = st.slider("Prob. mutación", 0.0, 1.0, 0.3, 0.05, key="pm17")
-    mut_sigma = st.number_input("σ mutación", min_value=0.001, max_value=1.0,
-                                value=0.05, step=0.01, key="ms17")
-    seed = st.number_input("Semilla", min_value=0, value=2023, key="seed17")
+    rf = st.number_input("Tasa libre de riesgo r_f", value=0.03)
+    pop_size = st.number_input("Tamaño población", value=50)
+    gens = st.number_input("Generaciones", value=80)
+    mutation = st.number_input("Mutación", value=0.10)
 
-    def parse_vector(s):
-        return np.array([float(x.strip()) for x in s.split(",") if x.strip() != ""])
+    seed = st.number_input("Semilla", value=11)
 
-    def parse_matrix(s):
-        rows = s.split(";")
-        mat = []
-        for r in rows:
-            if r.strip() == "":
-                continue
-            mat.append([float(x.strip()) for x in r.split(",") if x.strip() != ""])
-        return np.array(mat)
-
-    if st.button("Ejecutar GA para portafolio"):
-        try:
-            mu = parse_vector(mu_str)
-            Sigma = parse_matrix(Sigma_str)
-        except Exception as e:
-            st.error(f"Error al parsear μ o Σ: {e}")
-            return
-
-        if mu.shape[0] != 5 or Sigma.shape != (5, 5):
-            st.error("μ debe ser de tamaño 5 y Σ de tamaño 5x5.")
-            return
-
+    if st.button("Optimizar Sharpe"):
         np.random.seed(seed)
-        n_assets = 5
 
-        pop = np.random.rand(int(pop_size), n_assets)
-        pop = pop / pop.sum(axis=1, keepdims=True)
+        def normalize(w):
+            w = np.maximum(w, 0)
+            return w / w.sum()
 
-        def sharpe_ratio(w):
+        def sharpe(w):
             ret = mu @ w
-            var = w @ Sigma @ w
-            if var <= 0:
-                return -np.inf
-            return (ret - rf) / np.sqrt(var)
+            vol = np.sqrt(w @ Sigma @ w)
+            return (ret - rf) / vol
 
-        def fitness(w):
-            return -sharpe_ratio(w)
+        pop = np.random.dirichlet(np.ones(5), size=int(pop_size))
 
-        best_sharpe = []
-        best_w_hist = []
+        best_vals = []
+        best_ws = []
 
-        def tournament_selection(pop, fit, k=3):
-            idxs = np.random.choice(len(pop), size=k, replace=False)
-            best_idx = idxs[np.argmin(fit[idxs])]
-            return pop[best_idx].copy()
+        for g in range(int(gens)):
+            fit = np.array([sharpe(w) for w in pop])
+            probs = fit - fit.min() + 1e-6
+            probs /= probs.sum()
 
-        for _ in range(int(n_gen)):
-            fit = np.array([fitness(w) for w in pop])
-            best_idx = np.argmin(fit)
+            idx = np.random.choice(len(pop), size=len(pop), p=probs)
+            parents = pop[idx]
+
+            children = []
+            for i in range(0, len(parents), 2):
+                p1 = parents[i]
+                p2 = parents[(i+1) % len(parents)]
+                alpha = np.random.rand()
+                c = alpha*p1 + (1-alpha)*p2
+                children.append(c)
+
+            children = np.array(children)
+
+            mut_mask = np.random.rand(*children.shape) < mutation
+            children = children + mut_mask * np.random.normal(0, 0.05, children.shape)
+
+            children = np.array([normalize(w) for w in children])
+
+            pop = children.copy()
+
+            best_idx = np.argmax([sharpe(w) for w in pop])
             best_w = pop[best_idx]
-            best_sr = -fit[best_idx]
-            best_sharpe.append(best_sr)
-            best_w_hist.append(best_w)
+            best_ws.append(best_w)
+            best_vals.append(sharpe(best_w))
 
-            new_pop = []
-            while len(new_pop) < len(pop):
-                p1 = tournament_selection(pop, fit)
-                p2 = tournament_selection(pop, fit)
-
-                if np.random.rand() < p_crossover:
-                    child = 0.5*p1 + 0.5*p2
-                else:
-                    child = p1
-
-                if np.random.rand() < p_mut:
-                    child += np.random.normal(0, mut_sigma, size=n_assets)
-
-                child = np.maximum(child, 0)
-                if child.sum() == 0:
-                    child = np.ones_like(child) / n_assets
-                else:
-                    child /= child.sum()
-
-                new_pop.append(child)
-
-            pop = np.array(new_pop)
-
-        fit = np.array([fitness(w) for w in pop])
-        best_idx = np.argmin(fit)
-        best_w = pop[best_idx]
-        best_sr = -fit[best_idx]
-
-        st.subheader("Mejor portafolio encontrado")
-        st.write("Pesos w:", np.round(best_w, 4))
-        st.write(f"Sharpe ≈ {best_sr:.4f}")
-        st.write(f"Retorno μᵀw ≈ {mu @ best_w:.4f}")
-        st.write(f"Riesgo √(wᵀΣw) ≈ {np.sqrt(best_w @ Sigma @ best_w):.4f}")
+        st.subheader("Sharpe por generación")
 
         fig, ax = plt.subplots()
-        ax.plot(best_sharpe)
-        ax.set_title("Evolución del Sharpe por generación")
+        ax.plot(best_vals)
+        ax.set_title("Mejor Sharpe")
         ax.set_xlabel("Generación")
         ax.set_ylabel("Sharpe")
         st.pyplot(fig)
+
+        st.subheader("Mejor portafolio encontrado")
+        st.write(best_ws[-1])
+        st.write(f"Sharpe ≈ {best_vals[-1]:.4f}")
 
 # =========================================================
 # Ejercicio 18: EM para mezcla 0.6 N(0,1) + 0.4 N(4,1.5²)
 # =========================================================
 
 def ejercicio_18():
-    st.header("Ejercicio 18: EM para mezcla normal 0.6 N(0,1) + 0.4 N(4,1.5²)")
+    st.header("Ejercicio 18: EM para mezcla 0.6 N(0,1) + 0.4 N(4,1.5^2)")
 
     st.markdown(r"""
 Mezcla verdadera:
 
 \[
-0.6\,\mathcal N(0,1) + 0.4\,\mathcal N(4,1.5^2).
+0.6\,\mathcal{N}(0,1) + 0.4\,\mathcal{N}(4,1.5^2).
 \]
 
-Usamos EM para estimar \(\pi_1,\mu_1,\sigma_1^2,\mu_2,\sigma_2^2\).
+### **Parámetros a estimar**  
+\[
+(\pi_1,\mu_1,\sigma_1^2,\mu_2,\sigma_2^2).
+\]
+
+---
+
+### **E–paso**
+
+\[
+\gamma_{i1} =
+\frac{\pi_1\phi(x_i;\mu_1,\sigma_1^2)}
+{\pi_1\phi(x_i;\mu_1,\sigma_1^2) + (1-\pi_1)\phi(x_i;\mu_2,\sigma_2^2)}.
+\]
+
+\[
+\gamma_{i2}=1-\gamma_{i1}.
+\]
+
+---
+
+### **M–paso**
+
+\[
+\pi_1^{(t+1)} = \frac{1}{n}\sum_i \gamma_{i1},
+\]
+
+\[
+\mu_1^{(t+1)} = \frac{\sum_i \gamma_{i1}x_i}{\sum_i \gamma_{i1}},
+\qquad
+\sigma_1^{2(t+1)} = \frac{\sum_i \gamma_{i1}(x_i-\mu_1)^2}{\sum_i \gamma_{i1}},
+\]
+
+y análogo para el componente 2.
 """)
 
-    n = st.number_input("Tamaño de la muestra simulada", min_value=200, max_value=50000,
-                        value=2000, step=200, key="n18")
-    n_iter = st.number_input("Iteraciones EM", min_value=1, max_value=200,
-                             value=20, step=1, key="it18")
-    seed = st.number_input("Semilla", min_value=0, value=999, key="seed18")
+    n = st.number_input("Tamaño muestra simulada", value=2000)
+    it = st.number_input("Iteraciones EM", value=20)
+    seed = st.number_input("Semilla", value=999)
 
-    def normal_pdf(x, mu, sigma2):
-        return (1/np.sqrt(2*np.pi*sigma2)) * np.exp(-(x-mu)**2/(2*sigma2))
+    def normal_pdf(x, mu, s2):
+        return (1/np.sqrt(2*np.pi*s2))*np.exp(-(x-mu)**2/(2*s2))
 
     if st.button("Ejecutar EM"):
         np.random.seed(seed)
-        n_int = int(n)
-
-        Z_true = np.random.rand(n_int) < 0.6
-        X = np.where(Z_true,
-                     np.random.normal(0, 1, size=n_int),
-                     np.random.normal(4, 1.5, size=n_int))
+        X = np.where(
+            np.random.rand(int(n)) < 0.6,
+            np.random.normal(0,1,int(n)),
+            np.random.normal(4,1.5,int(n))
+        )
 
         pi1 = 0.5
-        mu1, mu2 = -1.0, 3.0
-        sigma1_2, sigma2_2 = 1.5**2, 1.0**2
+        mu1, mu2 = -1, 3
+        s1, s2 = 1.2, 1.8
 
-        logliks = []
+        loglik = []
 
-        for _ in range(int(n_iter)):
-            num1 = pi1 * normal_pdf(X, mu1, sigma1_2)
-            num2 = (1 - pi1) * normal_pdf(X, mu2, sigma2_2)
-            denom = num1 + num2
-            gamma1 = num1 / denom
-            gamma2 = num2 / denom
+        for t in range(int(it)):
+            num1 = pi1 * normal_pdf(X, mu1, s1)
+            num2 = (1 - pi1) * normal_pdf(X, mu2, s2)
+            gamma1 = num1 / (num1 + num2)
+            gamma2 = 1 - gamma1
 
             N1 = gamma1.sum()
             N2 = gamma2.sum()
 
-            pi1 = N1 / n_int
+            pi1 = N1 / n
             mu1 = (gamma1 * X).sum() / N1
             mu2 = (gamma2 * X).sum() / N2
-            sigma1_2 = (gamma1 * (X - mu1)**2).sum() / N1
-            sigma2_2 = (gamma2 * (X - mu2)**2).sum() / N2
+            s1 = (gamma1 * (X - mu1)**2).sum() / N1
+            s2 = (gamma2 * (X - mu2)**2).sum() / N2
 
-            ll = np.sum(np.log(
-                pi1 * normal_pdf(X, mu1, sigma1_2)
-                + (1 - pi1) * normal_pdf(X, mu2, sigma2_2)
-            ))
-            logliks.append(ll)
+            loglik.append(
+                np.sum(np.log(
+                    pi1*normal_pdf(X,mu1,s1) + (1-pi1)*normal_pdf(X,mu2,s2)
+                ))
+            )
 
-        st.subheader("Parámetros estimados")
-        st.write(f"π1 ≈ {pi1:.3f} (verdadero: 0.6)")
-        st.write(f"μ1 ≈ {mu1:.3f} (verdadero: 0.0)")
-        st.write(f"σ1² ≈ {sigma1_2:.3f} (verdadero: 1.0)")
-        st.write(f"μ2 ≈ {mu2:.3f} (verdadero: 4.0)")
-        st.write(f"σ2² ≈ {sigma2_2:.3f} (verdadero: 1.5² = {1.5**2:.3f})")
+        st.write(f"π1 ≈ {pi1:.3f}")
+        st.write(f"μ1 ≈ {mu1:.3f}, σ1² ≈ {s1:.3f}")
+        st.write(f"μ2 ≈ {mu2:.3f}, σ2² ≈ {s2:.3f}")
 
-        fig1, ax1 = plt.subplots()
-        ax1.plot(logliks, marker="o")
-        ax1.set_title("Log-verosimilitud vs. iteración EM")
-        ax1.set_xlabel("Iteración")
-        ax1.set_ylabel("log L")
-        st.pyplot(fig1)
-
-        xs = np.linspace(min(X) - 1, max(X) + 1, 400)
-        mix_pdf = pi1 * normal_pdf(xs, mu1, sigma1_2) + (1 - pi1)*normal_pdf(xs, mu2, sigma2_2)
-
-        fig2, ax2 = plt.subplots()
-        ax2.hist(X, bins=40, density=True, alpha=0.5, label="Datos simulados")
-        ax2.plot(xs, mix_pdf, linewidth=2, label="Mezcla ajustada")
-        ax2.legend()
-        ax2.set_title("Datos vs. mezcla normal ajustada")
-        st.pyplot(fig2)
+        fig, ax = plt.subplots()
+        ax.plot(loglik)
+        ax.set_title("Convergencia log-verosimilitud")
+        st.pyplot(fig)
 
 # =========================================================
 # Aplicación principal
