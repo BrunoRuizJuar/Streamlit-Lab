@@ -1339,6 +1339,22 @@ def main():
     # Llamamos directamente a la función correspondiente
     opciones[choice]()
 
+    st.markdown("---")
+    st.markdown(r"""
+    ### 👥 Créditos
+
+    **Leo Yahir Carpio Ángeles**  
+    **Arturo Jaramillo Salmerón**  
+    **Sebastián Gonzalo Mera Montiel**  
+    **Diego Rafael Moctezuma Ramírez**  
+    **Luis Alfredo Maza Ramírez**  
+    **Jesús Eduardo Rodarte Rosales**  
+    **Bruno Juárez Ruiz**
+
+    Repositorio del proyecto:  
+    🔗 [https://github.com/BrunoRuizJuar/Streamlit-Lab](https://github.com/BrunoRuizJuar/Streamlit-Lab)
+    """)
+
 
 if __name__ == "__main__":
     main()
