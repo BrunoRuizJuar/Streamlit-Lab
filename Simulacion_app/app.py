@@ -1308,71 +1308,38 @@ y análogo para el componente 2.
 # =========================================================
 # Aplicación principal
 # =========================================================
-
 def main():
     st.title("Tarea de Simulación – Ejercicios 1–18")
 
     st.sidebar.title("Navegación")
-    choice = st.sidebar.radio(
-        "Selecciona el ejercicio",
-        (
-            "Ejercicio 1: Gamma α entero",
-            "Ejercicio 2: Gamma(2.7,1) A-R",
-            "Ejercicio 3: Pareto(3,2)",
-            "Ejercicio 4: Pareto estratificado",
-            "Ejercicio 5: Beta(3,5) vía Gamma",
-            "Ejercicio 6: Beta(0.5,0.5)",
-            "Ejercicio 7: Gumbel",
-            "Ejercicio 8: Gumbel con variable de control",
-            "Ejercicio 9: Beta(2,6) — comparación",
-            "Ejercicio 10: Mezcla Gumbel/Gamma",
-            "Ejercicio 11: Metropolis–Hastings Beta",
-            "Ejercicio 12: Laplace — dos métodos",
-            "Ejercicio 13: Cauchy por transformada",
-            "Ejercicio 14: Normal multivariada (Cholesky)",
-            "Ejercicio 15: A-R densidad complicada",
-            "Ejercicio 16: GA para f(x)",
-            "Ejercicio 17: GA para portafolio",
-            "Ejercicio 18: EM para mezcla normal"
-        )
-    )
 
-    if choice.startswith("Ejercicio 1"):
-        ejercicio_1()
-    elif choice.startswith("Ejercicio 2"):
-        ejercicio_2()
-    elif choice.startswith("Ejercicio 3"):
-        ejercicio_3()
-    elif choice.startswith("Ejercicio 4"):
-        ejercicio_4()
-    elif choice.startswith("Ejercicio 5"):
-        ejercicio_5()
-    elif choice.startswith("Ejercicio 6"):
-        ejercicio_6()
-    elif choice.startswith("Ejercicio 7"):
-        ejercicio_7()
-    elif choice.startswith("Ejercicio 8"):
-        ejercicio_8()
-    elif choice.startswith("Ejercicio 9"):
-        ejercicio_9()
-    elif choice.startswith("Ejercicio 10"):
-        ejercicio_10()
-    elif choice.startswith("Ejercicio 11"):
-        ejercicio_11()
-    elif choice.startswith("Ejercicio 12"):
-        ejercicio_12()
-    elif choice.startswith("Ejercicio 13"):
-        ejercicio_13()
-    elif choice.startswith("Ejercicio 14"):
-        ejercicio_14()
-    elif choice.startswith("Ejercicio 15"):
-        ejercicio_15()
-    elif choice.startswith("Ejercicio 16"):
-        ejercicio_16()
-    elif choice.startswith("Ejercicio 17"):
-        ejercicio_17()
-    elif choice.startswith("Ejercicio 18"):
-        ejercicio_18()
+    opciones = {
+        "Ejercicio 1: Gamma α entero": ejercicio_1,
+        "Ejercicio 2: Gamma(2.7,1) A-R": ejercicio_2,
+        "Ejercicio 3: Pareto(3,2)": ejercicio_3,
+        "Ejercicio 4: Pareto estratificado": ejercicio_4,
+        "Ejercicio 5: Beta(3,5) vía Gamma": ejercicio_5,
+        "Ejercicio 6: Beta(0.5,0.5)": ejercicio_6,
+        "Ejercicio 7: Gumbel": ejercicio_7,
+        "Ejercicio 8: Gumbel con variable de control": ejercicio_8,
+        "Ejercicio 9: Beta(2,6) — comparación": ejercicio_9,
+        "Ejercicio 10: Mezcla Gumbel/Gamma": ejercicio_10,
+        "Ejercicio 11: Metropolis–Hastings Beta": ejercicio_11,
+        "Ejercicio 12: Laplace — dos métodos": ejercicio_12,
+        "Ejercicio 13: Cauchy por transformada": ejercicio_13,
+        "Ejercicio 14: Normal multivariada (Cholesky)": ejercicio_14,
+        "Ejercicio 15: A-R densidad complicada": ejercicio_15,
+        "Ejercicio 16: GA para f(x)": ejercicio_16,
+        "Ejercicio 17: GA para portafolio": ejercicio_17,
+        "Ejercicio 18: EM para mezcla normal": ejercicio_18,
+    }
+
+    choice = st.sidebar.radio("Selecciona el ejercicio", list(opciones.keys()))
+
+    # Llamamos directamente a la función correspondiente
+    opciones[choice]()
+
 
 if __name__ == "__main__":
     main()
+
