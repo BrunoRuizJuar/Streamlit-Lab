@@ -1306,6 +1306,97 @@ y análogo para el componente 2.
         st.pyplot(fig)
 
 # =========================================================
+# Ejercicio 19: Proceso de Markov — Teorema ergódico
+# =========================================================
+
+
+def ejercicio_19():
+    st.header("Ejercicio 19: Proceso de Markov — Teorema ergódico")
+
+    st.markdown(r"""
+Consideremos un proceso de Markov con generador \(Q\).  
+
+### (a) Teorema ergódico
+Una cadena continua es **ergódica** si es:
+
+1. irreducible,  
+2. recurrente positiva,  
+3. aperiódica.
+
+Entonces existe distribución estacionaria \(\pi\) tal que:
+
+\[
+\lim_{t\to\infty} P(X_t = i) = \pi_i.
+\]
+
+### (b) Condiciones para la existencia de estado estacionario
+
+La ecuación que debe satisfacerse es:
+
+\[
+\pi Q = 0,\qquad \sum_i \pi_i = 1.
+\]
+
+Si el sistema es irreducible y recurrente positiva, existe \(\pi\) única.
+
+### (c) Interpretación en sistemas físicos o financieros
+
+Ejemplos típicos:
+
+- modelos de colas M/M/1,  
+- fluctuaciones térmicas,  
+- tasas de interés modeladas como cadenas continuas,  
+- sistemas de inventarios.
+
+El estado estacionario representa la **distribución a largo plazo**.
+""")
+
+# =========================================================
+# Ejercicio 20: Proceso de nacimiento y muerte
+# =========================================================
+
+def ejercicio_20():
+    st.header("Ejercicio 20: Proceso de nacimiento y muerte")
+
+    st.markdown(r"""
+Consideremos un proceso de nacimiento y muerte con tasas:
+
+\[
+\lambda_n, \qquad \mu_n.
+\]
+
+### (a) Condiciones de ergodicidad
+
+Es ergódico si:
+
+\[
+\sum_{n=0}^{\infty}
+\left( \frac{\lambda_0\lambda_1\cdots\lambda_{n-1}}
+{\mu_1\mu_2\cdots\mu_n} \right)
+< \infty .
+\]
+
+### (b) Interpretación en teoría de colas
+
+Para una cola M/M/1 con tasas \(\lambda, \mu\):
+
+\[
+\rho = \frac{\lambda}{\mu} < 1 \quad\Rightarrow\quad \text{estable}.
+\]
+
+El sistema es **estable si llegan menos clientes de los que pueden ser atendidos**.
+
+### (c) Ejemplo aplicado
+
+En una central telefónica:
+
+- llamadas entran con tasa \(\lambda\),  
+- se atienden con tasa \(\mu\),  
+
+entonces si \(\lambda < \mu\), el sistema no colapsa y existe una distribución estacionaria.
+""")
+
+# =========================================================
 # Aplicación principal
 # =========================================================
 def main():
@@ -1332,6 +1423,9 @@ def main():
         "Ejercicio 16: GA para f(x)": ejercicio_16,
         "Ejercicio 17: GA para portafolio": ejercicio_17,
         "Ejercicio 18: EM para mezcla normal": ejercicio_18,
+        "Ejercicio 19: Proceso de Markov — Teorema ergódico": ejercicio_19,
+        "Ejercicio 20: Proceso de nacimiento y muerte": ejercicio_20,
+        "Análisis y Pruebas": seccion_pruebas,
     }
 
     choice = st.sidebar.radio("Selecciona el ejercicio", list(opciones.keys()))
