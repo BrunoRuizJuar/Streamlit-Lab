@@ -29,14 +29,14 @@ def ejercicio_1():
     st.markdown(r"""
 **Enunciado resumido**
 
-Sea una distribución Gamma con parámetros \((\alpha,\lambda)\) y densidad
+Sea una distribución Gamma con parámetros $(\alpha,\lambda)$ y densidad
 
-\[
+$$
 f(x)=\frac{\lambda^\alpha x^{\alpha-1} e^{-\lambda x}}{\Gamma(\alpha)},\quad x>0.
-\]
+$$
 
-1. Explique por qué esta distribución no admite transformada inversa cerrada para todo \(\alpha\).
-2. Simule \(10^5\) observaciones de una Gamma con \(\alpha\) entero usando suma de exponenciales.
+1. Explique por qué esta distribución no admite transformada inversa cerrada para todo $\alpha$.
+2. Simule $10^5$ observaciones de una Gamma con $\alpha$ entero usando suma de exponenciales.
 3. Grafique el histograma y compárelo con la densidad teórica.
 """)
 
@@ -45,23 +45,23 @@ f(x)=\frac{\lambda^\alpha x^{\alpha-1} e^{-\lambda x}}{\Gamma(\alpha)},\quad x>0
     st.markdown(r"""
 La función de distribución acumulada de una Gamma es
 
-\[
+$$
 F(x)=\int_0^x \frac{\lambda^\alpha t^{\alpha-1} e^{-\lambda t}}{\Gamma(\alpha)}\,dt.
-\]
+$$
 
-Para \(\alpha\) no entero, esta integral se expresa en términos de la **función gamma incompleta**, la cual no tiene forma cerrada elemental.  
+Para $\alpha$ no entero, esta integral se expresa en términos de la **función gamma incompleta**, la cual no tiene forma cerrada elemental.  
 
-Para usar transformada inversa requerimos \(F^{-1}(u)\), pero esta no existe de manera cerrada en general.  
+Para usar transformada inversa requerimos $F^{-1}(u)$, pero esta no existe de manera cerrada en general.  
 """)
 
     st.subheader("1(b) Simulación con suma de exponenciales")
 
     st.markdown(r"""
-Si \(\alpha=k\) es entero positivo:
+Si $\alpha=k$ es entero positivo:
 
-\[
+$$
 X = \sum_{i=1}^k Y_i, \qquad Y_i\sim \text{Exp}(\lambda).
-\]
+$$
 
 Esto se obtiene porque la convolución de exponenciales iid genera una Gamma con parámetro entero.
 """)
@@ -110,50 +110,50 @@ def ejercicio_2():
     st.header("Ejercicio 2: Gamma(α=2.7, λ=1) por Aceptación–Rechazo")
 
     st.markdown(r"""
-Queremos simular \(X\sim\mathrm{Gamma}(\alpha=2.7,\lambda=1)\) usando la propuesta  
-\(Y\sim\mathrm{Exp}(1)\).
+Queremos simular $X\sim\mathrm{Gamma}(\alpha=2.7,\lambda=1)$ usando la propuesta  
+$Y\sim\mathrm{Exp}(1)$.
 
 La densidad objetivo es:
 
-\[
+$$
 f(x)=\frac{x^{\alpha-1} e^{-x}}{\Gamma(\alpha)},\qquad x>0.
-\]
+$$
 
 La propuesta es:
 
-\[
+$$
 g(x)=e^{-x},\qquad x>0.
-\]
+$$
 
 Entonces:
 
-\[
+$$
 \frac{f(x)}{g(x)}=\frac{x^{\alpha-1}}{\Gamma(\alpha)}.
-\]
+$$
 
-Buscamos \(c\) tal que:
+Buscamos $c$ tal que:
 
-\[
+$$
 f(x) \le c\, g(x)\qquad \forall x>0.
-\]
+$$
 
 Esto equivale a:
 
-\[
+$$
 \frac{x^{\alpha-1}}{\Gamma(\alpha)} \le c.
-\]
+$$
 
-La función \(x^{\alpha-1}\) se maximiza en:
+La función $x^{\alpha-1}$ se maximiza en:
 
-\[
+$$
 x^\ast = \alpha - 1.
-\]
+$$
 
 Por lo tanto:
 
-\[
+$$
 c = \frac{(\alpha-1)^{\alpha-1}}{\Gamma(\alpha)}.
-\]
+$$
 """)
 
     alpha = 2.7
@@ -164,9 +164,9 @@ c = \frac{(\alpha-1)^{\alpha-1}}{\Gamma(\alpha)}.
     st.markdown(rf"""
 ### **Constante teórica**
 
-\[
+$$
 c = \frac{{(\alpha - 1)^{{\alpha - 1}}}}{{\Gamma(\alpha)}} \approx {c:.4f}
-\]
+$$
 """)
 
 
@@ -223,15 +223,15 @@ def ejercicio_3():
     st.markdown(r"""
 La distribución Pareto tiene F.C.D.A:
 
-\[
+$$
 F(x)=1 - \left(\frac{x_m}{x}\right)^\alpha,\qquad x\ge x_m.
-\]
+$$
 
 Usamos la transformada inversa:
 
-\[
+$$
 X = x_m (1-U)^{-1/\alpha}.
-\]
+$$
 """)
 
     alpha = 3
@@ -272,19 +272,19 @@ def ejercicio_4():
     st.header("Ejercicio 4: Pareto con reducción de varianza (muestreo estratificado)")
 
     st.markdown(r"""
-Consideramos \(X\sim\text{Pareto}(\alpha=3, x_m=2)\).
+Consideramos $X\sim\text{Pareto}(\alpha=3, x_m=2)$.
 
 Estratos:
 
-1. \(E_1 = (2,5]\)
-2. \(E_2 = (5,15]\)
-3. \(E_3 = (15,\infty)\)
+1. $E_1 = (2,5]$
+2. $E_2 = (5,15]$
+3. $E_3 = (15,\infty)$
 
 Probabilidades teóricas:
 
-\[
+$$
 P(X>a) = \left(\frac{x_m}{a}\right)^\alpha.
-\]
+$$
 """)
 
     alpha = 3
@@ -359,15 +359,15 @@ def ejercicio_5():
     st.markdown(r"""
 Si  
 
-\[
+$$
 X\sim\Gamma(3,1),\qquad Y\sim\Gamma(5,1),
-\]
+$$
 
 entonces:
 
-\[
+$$
 Z=\frac{X}{X+Y}\sim\text{Beta}(3,5).
-\]
+$$
 """)
 
     n = st.number_input("Tamaño de la muestra", min_value=1000, max_value=100000,
@@ -409,17 +409,17 @@ def ejercicio_6():
     st.markdown(r"""
 La densidad es:
 
-\[
+$$
 f(x)=\frac{1}{\pi\sqrt{x(1-x)}},\qquad x\in(0,1).
-\]
+$$
 
-La propuesta es uniforme: \(g(x)=1\).  
+La propuesta es uniforme: $g(x)=1$.  
 
-El máximo ocurre en \(x=1/2\):
+El máximo ocurre en $x=1/2$:
 
-\[
+$$
 c = f(1/2) = \frac{2}{\pi}.
-\]
+$$
 """)
 
     c = 2 / math.pi
@@ -468,15 +468,15 @@ def ejercicio_7():
     st.markdown(r"""
 La CDF es:
 
-\[
+$$
 F(x)=\exp\{-e^{-(x-\mu)/\beta}\}.
-\]
+$$
 
 Transformada inversa:
 
-\[
+$$
 X=\mu - \beta \ln(-\ln U).
-\]
+$$
 """)
 
     mu = st.number_input("μ", value=0.0, key="mu7")
@@ -511,16 +511,16 @@ def ejercicio_8():
     st.markdown(r"""
 Sea:
 
-\[
+$$
 X=\mu - \beta \ln(-\ln U), \qquad Y = -\ln U \sim \text{Exp}(1).
-\]
+$$
 
 Estimador corregido:
 
-\[
+$$
 \hat{\theta}_c = \bar X - b (\bar Y - 1),
 \qquad b = \frac{\mathrm{Cov}(X,Y)}{\mathrm{Var}(Y)}.
-\]
+$$
 """)
 
     mu = st.number_input("μ", value=0.0, key="mu8b")
@@ -564,17 +564,17 @@ def ejercicio_9():
     st.header("Ejercicio 9: Comparación de métodos para Beta(2,6)")
 
     st.markdown(r"""
-Simulamos \(X\sim\text{Beta}(2,6)\) mediante:
+Simulamos $X\sim\text{Beta}(2,6)$ mediante:
 
 1. **Transformación con Gamma:**
-   \[
+   $$
    X = \frac{G_1}{G_1 + G_2},\quad
    G_1\sim\Gamma(2,1),\ G_2\sim\Gamma(6,1).
-   \]
+   $$
 
 2. **Aceptación–Rechazo** con propuesta uniforme.
 
-3. **Transformada aproximada** (usando la \(F^{-1}\) de la Beta vía librería).
+3. **Transformada aproximada** (usando la $F^{-1}$ de la Beta vía librería).
 """)
 
     n = st.number_input("Tamaño de la muestra", min_value=2000, max_value=50000,
@@ -645,40 +645,40 @@ def ejercicio_10():
     st.markdown(r"""
 Sea una mezcla:
 
-\[
+$$
 X = \begin{cases}
 X_G & \text{con prob. } 0.5,\\[4pt]
 X_\Gamma & \text{con prob. } 0.5,
 \end{cases}
-\]
+$$
 
 donde:
 
-- \(X_G \sim \text{Gumbel}(\mu,\beta)\)
-- \(X_\Gamma \sim \text{Gamma}(\alpha,\lambda)\)
+- $X_G \sim \text{Gumbel}(\mu,\beta)$
+- $X_\Gamma \sim \text{Gamma}(\alpha,\lambda)$
 
 ### **Valores teóricos**
 
-\[
+$$
 E[X] = 0.5\,E[X_G] + 0.5\,E[X_\Gamma],
-\]
+$$
 
-\[
+$$
 \mathrm{Var}(X) = 0.5\,\mathrm{Var}(X_G) + 0.5\,\mathrm{Var}(X_\Gamma)
 + 0.5(1)\,(E[X_G] - E[X_\Gamma])^2 .
-\]
+$$
 
 Usando:
 
-\[
+$$
 E[X_G] = \mu + \beta\gamma,\qquad
 \mathrm{Var}(X_G)=\frac{\pi^2}{6}\beta^2,
-\]
+$$
 
-\[
+$$
 E[X_\Gamma] = \frac{\alpha}{\lambda},\qquad
 \mathrm{Var}(X_\Gamma]=\frac{\alpha}{\lambda^2}.
-\]
+$$
 """)
 
     mu = st.number_input("μ (Gumbel)", value=0.0)
@@ -741,23 +741,23 @@ def ejercicio_11():
     st.markdown(r"""
 Queremos simular de la distribución Beta:
 
-\[
+$$
 \pi(x) \propto x^{a-1}(1-x)^{b-1}, \qquad x\in(0,1).
-\]
+$$
 
 Usaremos Metropolis–Hastings con propuesta:
 
-\[
+$$
 Y \sim N(x_t,\sigma^2)\text{ truncada a }(0,1).
-\]
+$$
 
 El paso de aceptación es:
 
-\[
+$$
 \alpha(x_t,y)=\min\left\{1,
 \frac{\pi(y)\,q(x_t|y)}{\pi(x_t)\,q(y|x_t)}
 \right\}.
-\]
+$$
 """)
 
     a = st.number_input("a (>0)", value=2.0)
@@ -821,30 +821,30 @@ def ejercicio_12():
     st.markdown(r"""
 La densidad Laplace(0,b) es:
 
-\[
+$$
 f(x)=\frac{1}{2b}e^{-|x|/b}.
-\]
+$$
 
 ### **Transformada inversa**
 
-\[
+$$
 X = \begin{cases}
 b\ln(2U), & U<1/2,\\[4pt]
 -b\ln(2(1-U)), & U\ge 1/2.
 \end{cases}
-\]
+$$
 
 ### **Mezcla exponencial**
 
-\[
+$$
 X = 
 \begin{cases}
 E, & B=1,\\
 -E,& B=0,
 \end{cases}
-\]
+$$
 
-con \(B\sim\text{Bernoulli}(0.5)\) y \(E\sim\text{Exp}(1/b)\).
+con $B\sim\text{Bernoulli}(0.5)$ y $E\sim\text{Exp}(1/b)$.
 """)
 
     b = st.number_input("Parámetro b", value=1.0)
@@ -885,15 +885,15 @@ def ejercicio_13():
     st.markdown(r"""
 La Cauchy(0,1) tiene CDF:
 
-\[
+$$
 F(x)=\frac1\pi\arctan(x)+\frac12.
-\]
+$$
 
 **Transformada inversa:**
 
-\[
+$$
 X = \tan\big(\pi(U-\tfrac12)\big).
-\]
+$$
 """)
 
     n = st.number_input("Tamaño de muestra", value=20000)
@@ -923,15 +923,15 @@ def ejercicio_14():
     st.markdown(r"""
 Simulamos:
 
-\[
+$$
 X\sim N(\mu,\Sigma).
-\]
+$$
 
 Método:
 
-1. Obtener \(L\) tal que \(LL^\top=\Sigma\).
-2. Generar \(Z\sim N(0,I)\).
-3. \(X=\mu+LZ\).
+1. Obtener $L$ tal que $LL^\top=\Sigma$.
+2. Generar $Z\sim N(0,I)$.
+3. $X=\mu+LZ$.
 """)
 
     rho = st.slider("Correlación ρ", -0.95, 0.95, 0.6)
@@ -966,21 +966,21 @@ def ejercicio_15():
     st.markdown(r"""
 Queremos simular una variable con densidad:
 
-\[
+$$
 f(x) \propto x^2 e^{-x^2/2}, \qquad x>0.
-\]
+$$
 
 Usaremos como propuesta:
 
-\[
+$$
 g(x)=e^{-x},\quad x>0.
-\]
+$$
 
 Buscamos:
 
-\[
+$$
 c=\max_x \frac{f(x)}{g(x)} = x^2 e^{-x^2/2+x}.
-\]
+$$
 """)
 
     n = st.number_input("Tamaño de muestra", value=10000)
@@ -1028,14 +1028,14 @@ def ejercicio_16():
     st.markdown(r"""
 Queremos minimizar la función:
 
-\[
+$$
 f(x)=x^2+3\sin(5x),\qquad x\in[-4,4].
-\]
+$$
 
 Un Algoritmo Genético típico sigue estos pasos:
 
 1. **Inicialización:** generar una población aleatoria.
-2. **Evaluación:** computar \(f(x)\) para cada individuo.
+2. **Evaluación:** computar $f(x)$ para cada individuo.
 3. **Selección:** elegir padres proporcionalmente a su aptitud.
 4. **Cruza:** combinar dos padres para formar nuevos hijos.
 5. **Mutación:** perturbar ligeramente los hijos para mantener variabilidad.
@@ -1115,12 +1115,12 @@ def ejercicio_17():
     st.markdown(r"""
 Maximizamos el índice de Sharpe:
 
-\[
+$$
 \text{Sharpe}(w)= \frac{\mu^\top w - r_f}{\sqrt{w^\top\Sigma w}},
 \qquad w\ge0,\quad \sum_i w_i=1.
-\]
+$$
 
-Usamos un GA para encontrar el vector de pesos \(w\in\mathbb{R}^5\).
+Usamos un GA para encontrar el vector de pesos $w\in\mathbb{R}^5$.
 """)
 
     mu1 = st.text_input("Media de los activos (5 valores)", "0.12,0.08,0.10,0.07,0.15")
@@ -1214,42 +1214,41 @@ def ejercicio_18():
     st.markdown(r"""
 Mezcla verdadera:
 
-\[
+$$
 0.6\,\mathcal{N}(0,1) + 0.4\,\mathcal{N}(4,1.5^2).
-\]
+$$
 
-### **Parámetros a estimar**  
-\[
+### **Parámetros a estimar** $$
 (\pi_1,\mu_1,\sigma_1^2,\mu_2,\sigma_2^2).
-\]
+$$
 
 ---
 
 ### **E–paso**
 
-\[
+$$
 \gamma_{i1} =
 \frac{\pi_1\phi(x_i;\mu_1,\sigma_1^2)}
 {\pi_1\phi(x_i;\mu_1,\sigma_1^2) + (1-\pi_1)\phi(x_i;\mu_2,\sigma_2^2)}.
-\]
+$$
 
-\[
+$$
 \gamma_{i2}=1-\gamma_{i1}.
-\]
+$$
 
 ---
 
 ### **M–paso**
 
-\[
+$$
 \pi_1^{(t+1)} = \frac{1}{n}\sum_i \gamma_{i1},
-\]
+$$
 
-\[
+$$
 \mu_1^{(t+1)} = \frac{\sum_i \gamma_{i1}x_i}{\sum_i \gamma_{i1}},
 \qquad
 \sigma_1^{2(t+1)} = \frac{\sum_i \gamma_{i1}(x_i-\mu_1)^2}{\sum_i \gamma_{i1}},
-\]
+$$
 
 y análogo para el componente 2.
 """)
@@ -1314,7 +1313,7 @@ def ejercicio_19():
     st.header("Ejercicio 19: Proceso de Markov — Teorema ergódico")
 
     st.markdown(r"""
-Consideremos un proceso de Markov con generador \(Q\).  
+Consideremos un proceso de Markov con generador $Q$.  
 
 ### (a) Teorema ergódico
 Una cadena continua es **ergódica** si es:
@@ -1323,21 +1322,21 @@ Una cadena continua es **ergódica** si es:
 2. recurrente positiva,  
 3. aperiódica.
 
-Entonces existe distribución estacionaria \(\pi\) tal que:
+Entonces existe distribución estacionaria $\pi$ tal que:
 
-\[
+$$
 \lim_{t\to\infty} P(X_t = i) = \pi_i.
-\]
+$$
 
 ### (b) Condiciones para la existencia de estado estacionario
 
 La ecuación que debe satisfacerse es:
 
-\[
+$$
 \pi Q = 0,\qquad \sum_i \pi_i = 1.
-\]
+$$
 
-Si el sistema es irreducible y recurrente positiva, existe \(\pi\) única.
+Si el sistema es irreducible y recurrente positiva, existe $\pi$ única.
 
 ### (c) Interpretación en sistemas físicos o financieros
 
@@ -1361,28 +1360,28 @@ def ejercicio_20():
     st.markdown(r"""
 Consideremos un proceso de nacimiento y muerte con tasas:
 
-\[
+$$
 \lambda_n, \qquad \mu_n.
-\]
+$$
 
 ### (a) Condiciones de ergodicidad
 
 Es ergódico si:
 
-\[
+$$
 \sum_{n=0}^{\infty}
 \left( \frac{\lambda_0\lambda_1\cdots\lambda_{n-1}}
 {\mu_1\mu_2\cdots\mu_n} \right)
 < \infty .
-\]
+$$
 
 ### (b) Interpretación en teoría de colas
 
-Para una cola M/M/1 con tasas \(\lambda, \mu\):
+Para una cola M/M/1 con tasas $\lambda, \mu$:
 
-\[
+$$
 \rho = \frac{\lambda}{\mu} < 1 \quad\Rightarrow\quad \text{estable}.
-\]
+$$
 
 El sistema es **estable si llegan menos clientes de los que pueden ser atendidos**.
 
@@ -1390,10 +1389,10 @@ El sistema es **estable si llegan menos clientes de los que pueden ser atendidos
 
 En una central telefónica:
 
-- llamadas entran con tasa \(\lambda\),  
-- se atienden con tasa \(\mu\),  
+- llamadas entran con tasa $\lambda$,  
+- se atienden con tasa $\mu$,  
 
-entonces si \(\lambda < \mu\), el sistema no colapsa y existe una distribución estacionaria.
+entonces si $\lambda < \mu$, el sistema no colapsa y existe una distribución estacionaria.
 """)
 
 # =========================================================
@@ -1406,45 +1405,45 @@ def seccion_pruebas():
     st.markdown(r"""
 ## Cola M/M/1: Teoremas Ergódicos
 
-Sea una cola M/M/1 con tasas de llegada \(\lambda>0\) y servicio \(\mu>0\).  
-El proceso \(X(t)\), número de clientes en el sistema, es una cadena de Markov en tiempo continuo con espacio de estados:
+Sea una cola M/M/1 con tasas de llegada $\lambda>0$ y servicio $\mu>0$.  
+El proceso $X(t)$, número de clientes en el sistema, es una cadena de Markov en tiempo continuo con espacio de estados:
 
-\[
+$$
 \mathbb{N}_0 = \{0,1,2,\dots\}
-\]
+$$
 
 y matriz generadora:
 
-\[
+$$
 q_{n,n+1}=\lambda,\quad n\ge 0,
 \qquad
 q_{n,n-1}=\mu,\quad n\ge 1,
 \qquad
 q_{n,n}=-(\lambda+\mu \mathbf{1}_{\{n\ge 1\}}).
-\]
+$$
 
 Definimos el parámetro fundamental:
 
-\[
+$$
 \rho = \frac{\lambda}{\mu} \in (0,1).
-\]
+$$
 
 ---
 
 ## 1. Estacionariedad y ergodicidad
 
-### (a) Irreducibilidad en \(\mathbb{N}_0\)
+### (a) Irreducibilidad en $\mathbb{N}_0$
 
-Una CTMC es irreducible si para cualesquiera \(i,j\in\mathbb N_0\) existe \(t>0\) tal que:
+Una CTMC es irreducible si para cualesquiera $i,j\in\mathbb N_0$ existe $t>0$ tal que:
 
-\[
+$$
 \mathbb P_i(X(t)=j) > 0.
-\]
+$$
 
 En la M/M/1:
 
-- Desde cualquier estado \(n\) se puede llegar a \(n+1\) mediante una llegada.
-- Desde cualquier estado \(n\ge1\) se puede llegar a \(n-1\) mediante un servicio.
+- Desde cualquier estado $n$ se puede llegar a $n+1$ mediante una llegada.
+- Desde cualquier estado $n\ge1$ se puede llegar a $n-1$ mediante un servicio.
 - Combinando llegadas y salidas, cualquier estado es alcanzable desde cualquier otro.
 
 ✔ **Conclusión:** el proceso es irreducible.
@@ -1455,26 +1454,26 @@ En la M/M/1:
 
 Para un proceso de nacimiento–muerte, las ecuaciones de balance detallado son:
 
-\[
+$$
 \pi_n \lambda_n = \pi_{n+1} \mu_{n+1},\qquad n\ge 0.
-\]
+$$
 
 Aquí:
 
-- \(\lambda_n = \lambda\)
-- \(\mu_0 = 0\), \(\mu_n = \mu\) para \(n\ge1\)
+- $\lambda_n = \lambda$
+- $\mu_0 = 0$, $\mu_n = \mu$ para $n\ge1$
 
-Para \(n=0\):
+Para $n=0$:
 
-\[
+$$
 \pi_1 = \frac{\lambda}{\mu}\pi_0 = \rho \pi_0.
-\]
+$$
 
 Por inducción:
 
-\[
+$$
 \pi_n = \rho^n \pi_0, \qquad n\ge 0.
-\]
+$$
 
 ---
 
@@ -1482,64 +1481,64 @@ Por inducción:
 
 La suma total debe ser 1:
 
-\[
+$$
 \sum_{n=0}^\infty \pi_n 
 = \pi_0 \sum_{n=0}^\infty \rho^n
 = \frac{\pi_0}{1-\rho}
-\]
+$$
 
 Entonces:
 
-\[
+$$
 \pi_0 = 1-\rho.
-\]
+$$
 
 Distribución estacionaria final:
 
-\[
+$$
 \boxed{
 \pi_n = (1-\rho)\rho^n,\qquad n\ge0.
 }
-\]
+$$
 
-La serie converge **solo si \(\rho<1\)**.
+La serie converge **solo si $\rho<1$**.
 
-✔ Si \(\rho<1\): recurrente positiva → ergódica  
-❌ Si \(\rho\ge1\): no existe estación → no ergódica
+✔ Si $\rho<1$: recurrente positiva → ergódica  
+❌ Si $\rho\ge1$: no existe estación → no ergódica
 
 ---
 
-## 2. Proporción de tiempo con \(X(t)\ge 3\)
+## 2. Proporción de tiempo con $X(t)\ge 3$
 
 Sea:
 
-\[
+$$
 f(x)=\mathbf 1_{\{x\ge 3\}}.
-\]
+$$
 
 ### (a) Teorema ergódico para CTMC
 
-Si una CTMC es irreducible + recurrente positiva y \(f\) es integrable:
+Si una CTMC es irreducible + recurrente positiva y $f$ es integrable:
 
-\[
+$$
 \lim_{T\to\infty} \frac1T \int_0^T f(X(t))\,dt 
 = \sum_{n=0}^\infty f(n)\pi_n 
 = \mathbb E_\pi[f(X)].
-\]
+$$
 
 ### (b) Aplicación:
 
-\[
+$$
 \sum_{n=3}^\infty \pi_n 
 = (1-\rho) \sum_{n=3}^\infty \rho^n.
-\]
+$$
 
 ### (c) Cálculo explícito:
 
-\[
+$$
 (1-\rho)\rho^3 \frac{1}{1-\rho}
 = \boxed{\rho^3}.
-\]
+$$
 
 Interpretación:
 > Proporción de tiempo de largo plazo con **3 o más clientes en el sistema**.
@@ -1550,56 +1549,56 @@ Interpretación:
 
 Sea el costo instantáneo:
 
-\[
+$$
 g(n) = n^2.
-\]
+$$
 
 ### (a) Integrabilidad
 
-Como \(n^2 \rho^n \to 0\) cuando \(n\to\infty\):
+Como $n^2 \rho^n \to 0$ cuando $n\to\infty$:
 
-\[
+$$
 \sum_{n=0}^\infty n^2 (1-\rho)\rho^n < \infty.
-\]
+$$
 
-✔ Entonces, \(g\) es integrable respecto a \(\pi\).
+✔ Entonces, $g$ es integrable respecto a $\pi$.
 
 ---
 
-### (b) Teorema ergódico aplicado a \(g\)
+### (b) Teorema ergódico aplicado a $g$
 
-\[
+$$
 \lim_{T\to\infty} \frac{1}{T} \int_0^T g(X(t))\,dt
 = \sum_{n=0}^\infty n^2 \pi_n
 = \mathbb E_\pi[n^2].
-\]
+$$
 
 ---
 
-### (c) Cálculo explícito de \(\mathbb{E}_\pi[n^2]\)
+### (c) Cálculo explícito de $\mathbb{E}_\pi[n^2]$
 
-Si \(N\sim\mathrm{Geom}(1-\rho)\) en \(\{0,1,2,\dots\}\):
+Si $N\sim\mathrm{Geom}(1-\rho)$ en $\{0,1,2,\dots\}$:
 
-\[
+$$
 \mathbb E[N] = \frac{\rho}{1-\rho}, \qquad 
 \mathrm{Var}(N) = \frac{\rho}{(1-\rho)^2}.
-\]
+$$
 
 Entonces:
 
-\[
+$$
 \mathbb E[N^2] 
 = \mathrm{Var}(N) + (\mathbb E[N])^2
 = \frac{\rho(1+\rho)}{(1-\rho)^2}.
-\]
+$$
 
 Por tanto:
 
-\[
+$$
 \boxed{
 \mathbb E_\pi[g(X)] = \frac{\rho(1+\rho)}{(1-\rho)^2}.
 }
-\]
+$$
 
 Interpretación:
 > **Costo promedio de largo plazo** cuando el costo crece cuadráticamente con el número de clientes.
@@ -1614,6 +1613,8 @@ def main():
 
     st.sidebar.title("Navegación")
 
+    # Asegúrate de que estas funciones (ejercicio_1, etc.) estén definidas
+    # en tu código antes de llamar a main(), o importadas desde otro módulo.
     opciones = {
         "Ejercicio 1: Gamma α entero": ejercicio_1,
         "Ejercicio 2: Gamma(2.7,1) A-R": ejercicio_2,
@@ -1641,19 +1642,14 @@ def main():
     choice = st.sidebar.radio("Selecciona el ejercicio", list(opciones.keys()))
 
     # Llamamos directamente a la función correspondiente
-    opciones[choice]()
+    if choice in opciones:
+        opciones[choice]()
 
     st.markdown("---")
     st.markdown(r"""
     ### 👥 Créditos
 
-    **Leo Yahir Carpio Ángeles**  
-    **Arturo Jaramillo Salmerón**  
-    **Sebastián Gonzalo Mera Montiel**  
-    **Diego Rafael Moctezuma Ramírez**  
-    **Luis Alfredo Maza Ramírez**  
-    **Jesús Eduardo Rodarte Rosales**  
-    **Bruno Juárez Ruiz**
+    **Leo Yahir Carpio Ángeles** **Arturo Jaramillo Salmerón** **Sebastián Gonzalo Mera Montiel** **Diego Rafael Moctezuma Ramírez** **Luis Alfredo Maza Ramírez** **Jesús Eduardo Rodarte Rosales** **Bruno Juárez Ruiz**
 
     Repositorio del proyecto:  
     🔗 [https://github.com/BrunoRuizJuar/Streamlit-Lab](https://github.com/BrunoRuizJuar/Streamlit-Lab)
@@ -1662,4 +1658,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
