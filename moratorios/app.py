@@ -1,5 +1,3 @@
-# streamlit run app.py
-
 from pathlib import Path
 from datetime import date
 import calendar
@@ -15,83 +13,118 @@ st.set_page_config(
 
 BASE_DIR = Path(__file__).parent
 UDI_FILE = BASE_DIR / "Diaria.csv"
-CCP_FILE = BASE_DIR / "mensual.xlsx"
+CCP_FILE = BASE_DIR / "mensual.csv"
+
+
+def file_version(path: Path) -> float:
+    """
+    Regresa la fecha de modificación del archivo para invalidar caché cuando cambie.
+    """
+    return path.stat().st_mtime
 
 
 @st.cache_data
-def load_udi_data(path: Path) -> pd.DataFrame:
+def load_udi_data(path: Path, version: float) -> pd.DataFrame:
     """
-    Carga archivo de UDI diaria.
-    Intenta detectar automáticamente columnas de fecha y valor.
+    Carga archivo de UDI diaria exportado desde Banxico.
     """
-    if path.suffix.lower() == ".csv":
-        df = pd.read_csv(path, encoding="latin1")
-    else:
-        df = pd.read_excel(path)
+    with open(path, "r", encoding="latin1") as f:
+        lines = f.readlines()
 
-    df.columns = [str(c).strip() for c in df.columns]
+    start_idx = None
 
-    date_col = None
-    value_col = None
+    for i, line in enumerate(lines):
+        clean = line.strip().replace('"', "")
+        if clean.lower().startswith("fecha,"):
+            start_idx = i + 1
+            break
 
-    for c in df.columns:
-        c_low = c.lower()
-        if date_col is None and ("fecha" in c_low or "date" in c_low):
-            date_col = c
-        if value_col is None and ("udi" in c_low or "valor" in c_low):
-            value_col = c
+    if start_idx is None:
+        raise ValueError("No se encontró el encabezado real de datos en el archivo UDI.")
 
-    if date_col is None:
-        date_col = df.columns[0]
-    if value_col is None:
-        value_col = df.columns[1]
+    records = []
+    for line in lines[start_idx:]:
+        clean = line.strip().replace('"', "")
 
-    df = df[[date_col, value_col]].copy()
-    df.columns = ["fecha", "udi"]
+        if not clean:
+            continue
 
-    df["fecha"] = pd.to_datetime(df["fecha"], dayfirst=True, errors="coerce")
+        clean = clean.rstrip(";")
+        parts = clean.split(",")
+
+        if len(parts) < 2:
+            continue
+
+        fecha_txt = parts[0].strip()
+        udi_txt = parts[1].strip()
+
+        records.append([fecha_txt, udi_txt])
+
+    if not records:
+        raise ValueError("No se encontraron registros de UDI en el archivo.")
+
+    df = pd.DataFrame(records, columns=["fecha", "udi"])
+
+    df["fecha"] = pd.to_datetime(df["fecha"], format="%d/%m/%Y", errors="coerce")
     df["udi"] = pd.to_numeric(df["udi"], errors="coerce")
 
     df = df.dropna(subset=["fecha", "udi"]).sort_values("fecha").reset_index(drop=True)
-    df["fecha"] = df["fecha"].dt.date
+    df["fecha"] = df["fecha"].dt.normalize()
+
     return df
 
 
 @st.cache_data
-def load_ccp_data(path: Path) -> pd.DataFrame:
+def load_ccp_data(path: Path, version: float) -> pd.DataFrame:
     """
-    Carga archivo mensual de CCP.
-    Intenta detectar automáticamente columnas de fecha/mes y valor CCP.
+    Carga CCP mensual desde CSV Banxico.
+    Busca la fila real de encabezado: "Fecha","SF286",...
+    y extrae la columna SF286.
     """
-    if path.suffix.lower() in [".xlsx", ".xls"]:
-        df = pd.read_excel(path)
-    else:
-        df = pd.read_csv(path, encoding="latin1")
+    with open(path, "r", encoding="latin1") as f:
+        lines = f.readlines()
 
-    df.columns = [str(c).strip() for c in df.columns]
+    start_idx = None
 
-    date_col = None
-    value_col = None
+    for i, line in enumerate(lines):
+        clean = line.strip().replace('"', "")
+        if clean.startswith("Fecha,") and "SF286" in clean:
+            start_idx = i + 1
+            break
 
-    for c in df.columns:
-        c_low = c.lower()
-        if date_col is None and ("fecha" in c_low or "mes" in c_low or "date" in c_low):
-            date_col = c
-        if value_col is None and ("ccp" in c_low or "valor" in c_low or "tasa" in c_low):
-            value_col = c
+    if start_idx is None:
+        raise ValueError("No se encontró el encabezado real de datos en el archivo CCP.")
 
-    if date_col is None:
-        date_col = df.columns[0]
-    if value_col is None:
-        value_col = df.columns[1]
+    records = []
+    for line in lines[start_idx:]:
+        clean = line.strip().replace('"', "")
 
-    df = df[[date_col, value_col]].copy()
-    df.columns = ["fecha", "ccp"]
+        if not clean:
+            continue
 
-    df["fecha"] = pd.to_datetime(df["fecha"], dayfirst=True, errors="coerce")
+        parts = [p.strip() for p in clean.split(",")]
+
+        if len(parts) < 2:
+            continue
+
+        fecha_txt = parts[0]
+        ccp_txt = parts[1]
+
+        records.append([fecha_txt, ccp_txt])
+
+    if not records:
+        raise ValueError("No se encontraron registros de CCP en el archivo.")
+
+    df = pd.DataFrame(records, columns=["fecha", "ccp"])
+
+    df["ccp"] = df["ccp"].replace(["N/E", "", "nan", "None"], pd.NA)
     df["ccp"] = pd.to_numeric(df["ccp"], errors="coerce")
 
+    df["fecha"] = pd.to_datetime(df["fecha"], format="%d/%m/%Y", errors="coerce")
+
     df = df.dropna(subset=["fecha", "ccp"]).sort_values("fecha").reset_index(drop=True)
+    df["fecha"] = df["fecha"].dt.normalize()
+
     df["anio"] = df["fecha"].dt.year
     df["mes"] = df["fecha"].dt.month
 
@@ -100,18 +133,26 @@ def load_ccp_data(path: Path) -> pd.DataFrame:
 
 def get_udi_value(udi_df: pd.DataFrame, target_date: date) -> float:
     """
-    Busca UDI exacta; si no existe, usa el último valor anterior.
+    Busca UDI exacta.
     """
-    eligible = udi_df[udi_df["fecha"] <= target_date]
-    if eligible.empty:
-        raise ValueError(f"No hay UDI disponible en o antes de {target_date}")
-    return float(eligible.iloc[-1]["udi"])
+    target_ts = pd.Timestamp(target_date).normalize()
+    exact = udi_df.loc[udi_df["fecha"].eq(target_ts), "udi"]
+
+    if exact.empty:
+        cercanas = udi_df[
+            (udi_df["fecha"] >= target_ts - pd.Timedelta(days=2)) &
+            (udi_df["fecha"] <= target_ts + pd.Timedelta(days=2))
+        ][["fecha", "udi"]]
+
+        raise ValueError(
+            f"No existe UDI exacta para la fecha {target_date}. "
+            f"Fechas cercanas encontradas: {cercanas.to_dict(orient='records')}"
+        )
+
+    return float(exact.iloc[0])
 
 
 def month_range(start_date: date, end_date: date):
-    """
-    Genera (anio, mes) entre start_date y end_date, inclusive.
-    """
     y, m = start_date.year, start_date.month
     while (y, m) <= (end_date.year, end_date.month):
         yield y, m
@@ -123,9 +164,6 @@ def month_range(start_date: date, end_date: date):
 
 
 def get_days_in_month_segment(start_date: date, end_date: date, year: int, month: int) -> int:
-    """
-    Regresa cuántos días de [start_date, end_date] caen dentro de ese mes.
-    """
     first_day = date(year, month, 1)
     last_day = date(year, month, calendar.monthrange(year, month)[1])
 
@@ -139,18 +177,15 @@ def get_days_in_month_segment(start_date: date, end_date: date, year: int, month
 
 
 def get_ccp_for_month(ccp_df: pd.DataFrame, year: int, month: int) -> float:
-    """
-    Obtiene el CCP del mes indicado.
-    Si no existe exacto, usa el último valor anterior disponible.
-    """
     exact = ccp_df[(ccp_df["anio"] == year) & (ccp_df["mes"] == month)]
     if not exact.empty:
         return float(exact.iloc[-1]["ccp"])
 
-    ref_date = pd.Timestamp(year=year, month=month, day=1)
+    ref_date = pd.Timestamp(year=year, month=month, day=1).normalize()
     eligible = ccp_df[ccp_df["fecha"] <= ref_date]
     if eligible.empty:
         raise ValueError(f"No hay CCP disponible para {month:02d}/{year} ni meses anteriores.")
+
     return float(eligible.iloc[-1]["ccp"])
 
 
@@ -169,14 +204,20 @@ def calculate_pipeline(
     valor_udi_inicial = get_udi_value(udi_df, fecha_inicial)
     valor_udi_final = get_udi_value(udi_df, fecha_final)
 
+    udis_inicial = deuda_inicial / valor_udi_inicial
+
     detalle_meses = []
     castigo_total = 0.0
+    
 
     for anio, mes in month_range(fecha_inicial, fecha_final):
         ccp = get_ccp_for_month(ccp_df, anio, mes)
         dias_mes_tramo = get_days_in_month_segment(fecha_inicial, fecha_final, anio, mes)
 
-        castigo_mes = ((((ccp / 100.0) * 1.25) / 365.0) * dias_mes_tramo) * valor_udi_final
+
+        ## AQUI ESTA EL NMALDITO ERRORRR PERO NO SE QUE ESSSSSS
+        factor_diario = (((ccp / 100.0) * 1.25) / 365.0)
+        castigo_mes = (factor_diario * dias_mes_tramo * udis_inicial) * valor_udi_final
         castigo_total += castigo_mes
 
         detalle_meses.append({
@@ -184,18 +225,14 @@ def calculate_pipeline(
             "Mes": mes,
             "CCP": ccp,
             "Días del tramo": dias_mes_tramo,
-            "Factor diario": (((ccp / 100.0) * 1.25) / 365.0),
+            "Factor diario": factor_diario,
+            "UDIS inicial": udis_inicial,
+            "Valor UDI inicial": valor_udi_inicial,
             "Valor UDI final": valor_udi_final,
             "Castigo del mes": castigo_mes,
         })
 
-    # Conversión de pesos a UDIS
-    udis_inicial = deuda_inicial / valor_udi_inicial
-
-    # Actualización en pesos
     actualizacion = udis_inicial * valor_udi_final
-
-    # Deuda final
     deuda_final = actualizacion + castigo_total
 
     return {
@@ -226,8 +263,8 @@ if not UDI_FILE.exists() or not CCP_FILE.exists():
     st.stop()
 
 try:
-    udi_df = load_udi_data(UDI_FILE)
-    ccp_df = load_ccp_data(CCP_FILE)
+    udi_df = load_udi_data(UDI_FILE, file_version(UDI_FILE))
+    ccp_df = load_ccp_data(CCP_FILE, file_version(CCP_FILE))
 except Exception as e:
     st.error(f"Error cargando archivos: {e}")
     st.stop()
@@ -236,10 +273,10 @@ with st.expander("Ver muestra de datos cargados"):
     c1, c2 = st.columns(2)
     with c1:
         st.subheader("UDI diaria")
-        st.dataframe(udi_df.head(10), use_container_width=True)
+        st.dataframe(udi_df.head(10), width="stretch")
     with c2:
         st.subheader("CCP mensual")
-        st.dataframe(ccp_df.head(10), use_container_width=True)
+        st.dataframe(ccp_df.head(10), width="stretch")
 
 st.subheader("Entradas")
 
@@ -290,7 +327,7 @@ if st.button("Calcular", type="primary"):
 
         st.dataframe(
             resumen.style.format({"Monto": "{:,.6f}"}),
-            use_container_width=True
+            width="stretch"
         )
 
         st.subheader("Detalle mensual del castigo")
@@ -298,45 +335,13 @@ if st.button("Calcular", type="primary"):
             result["detalle_meses"].style.format({
                 "CCP": "{:,.6f}",
                 "Factor diario": "{:,.10f}",
+                "UDIS inicial": "{:,.6f}",
+                "Valor UDI inicial": "{:,.6f}",
                 "Valor UDI final": "{:,.6f}",
                 "Castigo del mes": "${:,.6f}",
             }),
-            use_container_width=True
+            width="stretch"
         )
-
-        with st.expander("Fórmulas usadas"):
-            st.markdown(
-                    """
-            **Castigo por mes**
-
-                (((((CCP / 100) * 1.25) / 365) * días_del_tramo_en_ese_mes) * valor_UDI_final)
-
-            **UDIS inicial**
-
-                deuda_inicial / valor_UDI_inicial
-
-            **Actualización**
-
-                UDIS_inicial * valor_UDI_final
-
-            **Deuda final**
-
-                actualización + castigo
-                            """
-            )
 
     except Exception as e:
         st.error(f"Error en el cálculo: {e}")
-
-    with st.expander("Fórmulas usadas"):
-        st.markdown("**Castigo por mes**")
-        st.code("(((((CCP / 100) * 1.25) / 365) * días_del_tramo_en_ese_mes) * valor_UDI_final)", language="text")
-
-        st.markdown("**UDIS inicial**")
-        st.code("deuda_inicial / valor_UDI_inicial", language="text")
-
-        st.markdown("**Actualización**")
-        st.code("UDIS_inicial * valor_UDI_final", language="text")
-
-        st.markdown("**Deuda final**")
-        st.code("actualización + castigo", language="text")
